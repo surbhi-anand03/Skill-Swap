@@ -1,0 +1,99 @@
+/* Full page */
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #e6e6e6;
+}
+
+/* Card */
+.login-card {
+  width: 350px;
+  border-radius: 15px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Top blue section */
+.login-top {
+  background: linear-gradient(135deg, #2196f3, #1e88e5);
+  padding: 40px;
+  text-align: center;
+}
+
+/* Avatar */
+.login-avatar {
+  width: 100px;
+}
+
+/* Form */
+.login-form {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Inputs */
+.login-input {
+  padding: 12px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  background: #f0f0f0;
+}
+
+/* Password wrapper */
+.password-wrapper {
+  position: relative;
+}
+
+/* Eye icon */
+.eye-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* Forgot password */
+.forgot {
+  text-align: right;
+  font-size: 12px;
+}
+
+.forgot a {
+  text-decoration: none;
+  color: #1e88e5;
+}
+
+/* Button */
+.login-btn {
+  padding: 12px;
+  border-radius: 20px;
+  border: none;
+  background: #1e88e5;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-btn:hover {
+  background: #1565c0;
+}
+
+/* Signup text */
+.signup-text {
+  text-align: center;
+  font-size: 14px;
+}
+
+.signup-text a {
+  color: #1e88e5;
+  text-decoration: none;
+  font-weight: bold;
+}
