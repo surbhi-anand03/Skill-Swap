@@ -22,7 +22,8 @@ export default function Login() {
 
       alert("Login successful 🚀");
 
-      navigate("/home"); // redirect
+      localStorage.setItem("token", res.data.token);
+      navigate("/profile");
     } catch (err) {
       alert(err.response?.data?.message || "Error");
     }

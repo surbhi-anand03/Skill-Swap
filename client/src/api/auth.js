@@ -1,24 +1,44 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api/auth";
+// ✅ create axios instance (NOT string)
+const API = axios.create({
+  baseURL: "http://localhost:5000/api/auth",
+});
+
+// ✅ attach token automatically
+API.interceptors.request.use((req) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    req.headers.Authorization = token;
+  }
+
+  return req;
+});
+
+// ================= AUTH =================
 
 // Signup flow
 export const requestOtp = (data) =>
-  axios.post(`${API}/request-otp`, data);
+  API.post("/request-otp", data);
 
 export const verifyOtp = (data) =>
-  axios.post(`${API}/verify-otp`, data);
+  API.post("/verify-otp", data);
 
 export const registerUser = (data) =>
-  axios.post(`${API}/register`, data);
+  API.post("/register", data);
 
 // Login
 export const loginUser = (data) =>
-  axios.post(`${API}/login`, data);
+  API.post("/login", data);
 
 // Forgot password
 export const forgotPasswordOtp = (data) =>
-  axios.post(`${API}/forgot-password/request-otp`, data);
+  API.post("/forgot-password/request-otp", data);
 
 export const resetPassword = (data) =>
-  axios.post(`${API}/forgot-password/verify-otp`, data);
+  API.post("/forgot-password/verify-otp", data);
+
+// Profile
+export const getProfile = () =>
+  API.get("/profile");

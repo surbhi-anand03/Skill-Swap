@@ -11,8 +11,9 @@ export default function Home() {
 
   return (
     <div className="home-container">
-      <h1>Welcome to SkillSwap 🎉</h1>
+      <h1>Welcome to SkillSwap</h1>
       <p>Start exchanging skills 🚀</p>
+
       <button onClick={handleLogout}>Logout</button>
     </div>
   );
