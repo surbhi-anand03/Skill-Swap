@@ -18,12 +18,12 @@ export default function Login() {
     try {
       const res = await loginUser(form);
 
-      localStorage.setItem("token", res.data.token);
-
       alert("Login successful 🚀");
 
       localStorage.setItem("token", res.data.token);
-      navigate("/profile");
+      navigate("/home");
+      console.log("LOGIN TOKEN:", res.data.token);
+
     } catch (err) {
       alert(err.response?.data?.message || "Error");
     }

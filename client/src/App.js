@@ -8,6 +8,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
+import Discover from "./pages/Discover";
 
 function App() {
   return (
@@ -45,6 +46,19 @@ function App() {
             </PrivateRoute>
           }
         />
+        
+        <Route
+          path="/discover"
+          element={
+            <PrivateRoute>
+              <>
+                <Navbar />
+                <Discover />
+              </>
+            </PrivateRoute>
+          }
+        />
+
 
       </Routes>
     </BrowserRouter>

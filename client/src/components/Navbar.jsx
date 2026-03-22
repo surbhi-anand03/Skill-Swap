@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -16,6 +16,7 @@ export default function Navbar() {
       <div>
         <button onClick={() => navigate("/profile")}>Profile</button>
         <button onClick={() => navigate("/home")}>Home</button>
+        <Link to="/discover">Discover</Link>
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
