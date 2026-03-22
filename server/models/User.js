@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
 
   skillsOffered: [String],
   skillsWanted: [String],
+  bio:String,
 
 }, { timestamps: true });
 
