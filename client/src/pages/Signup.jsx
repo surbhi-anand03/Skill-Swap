@@ -33,6 +33,11 @@ export default function Signup() {
           />
 
           <button>Send OTP</button>
+
+          <p className="login-text">
+            Already Registered? <a href="/">LogIn</a>
+          </p>
+
         </form>
       </div>
     </div>

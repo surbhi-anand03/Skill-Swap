@@ -34,3 +34,9 @@
   color: white;
   font-weight: bold;
 }
+
+.login-text a {
+  color: #1e88e5;
+  text-decoration: none;
+  font-weight: bold;
+}
