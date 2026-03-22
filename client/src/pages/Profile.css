@@ -1,0 +1,114 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.profile-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+}
+
+.profile-card {
+  width: 350px;
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.avatar {
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+  color: white;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: auto;
+  margin-bottom: 10px;
+}
+
+.profile-card h2 {
+  margin: 5px 0;
+}
+
+.email {
+  color: gray;
+  font-size: 14px;
+}
+
+.profile-card input,
+.profile-card textarea {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.profile-card textarea {
+  resize: none;
+  height: 80px;
+}
+
+.profile-card button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+.profile-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 80px; /* space below navbar */
+}
+
+.profile-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 400px;
+  position: relative;
+}
+/* top section under navbar */
+.profile-topbar {
+  padding: 10px 20px;
+}
+
+/* back button clean look */
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #4f46e5;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.back-btn:hover {
+  text-decoration: underline;
+}
+
+/* center card */
+.profile-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.profile-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 400px;
+}
