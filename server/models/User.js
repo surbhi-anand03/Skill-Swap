@@ -13,7 +13,17 @@ const userSchema = new mongoose.Schema({
 
   skillsOffered: [String],
   skillsWanted: [String],
+
   bio:String,
+  
+  likedUsers: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+    ],
+
+    skippedUsers: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+    ],
+
 
 }, { timestamps: true });
 
