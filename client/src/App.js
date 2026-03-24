@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
 import Discover from "./pages/Discover";
+import Matches from "./pages/Matches";
 
 function App() {
   return (
@@ -54,6 +55,18 @@ function App() {
               <>
                 <Navbar />
                 <Discover />
+              </>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/matches"
+          element={
+            <PrivateRoute>
+              <>
+                <Navbar />
+                <Matches />
               </>
             </PrivateRoute>
           }

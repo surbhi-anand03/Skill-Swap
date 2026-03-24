@@ -30,6 +30,12 @@ export const registerUser = (data) =>
 export const loginUser = (data) =>
   API.post("/auth/login", data);
 
+export const forgotPasswordOtp = (data) =>
+  API.post("/auth/forgot-password/request-otp", data);
+
+export const resetPassword = (data) =>
+  API.post("/auth/forgot-password/verify-otp", data);
+
 // ================= PROFILE =================
 export const getProfile = () =>
   API.get("/user/profile");
@@ -44,5 +50,9 @@ export const likeUser = (id) =>
 export const skipUser = (id) =>
   API.post(`/user/skip/${id}`);
 
+// ================= MATCHES =================
+
+export const getMatchesList = () =>
+  API.get("/user/matches");
 
 export default API;
