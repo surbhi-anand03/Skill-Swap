@@ -1,107 +1,125 @@
 import { useEffect, useState } from "react";
 import { getMatches, likeUser, skipUser } from "../api/api";
 import UserCard from "../components/UserCard";
+import { Sparkles, Compass } from "lucide-react";
 
 const Discover = () => {
-const [recommended, setRecommended] = useState([]);
-const [explore, setExplore] = useState([]);
+  const [recommended, setRecommended] = useState([]);
+  const [explore, setExplore] = useState([]);
 
-useEffect(() => {
-fetchUsers();
-}, []);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-const fetchUsers = async () => {
-try {
-const res = await getMatches();
-  setRecommended(res.data.recommended || []);
-  setExplore(res.data.allUsers || []);
-} catch (err) {
-  console.error(err);
-}
+  const fetchUsers = async () => {
+    try {
+      const res = await getMatches();
+      setRecommended(res.data.recommended || []);
+      setExplore(res.data.allUsers || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-};
+  // ❤️ LIKE
+  const handleLike = async (id) => {
+    try {
+      await likeUser(id);
 
-// ❤️ LIKE
-const handleLike = async (id) => {
-try {
-await likeUser(id);
+      setRecommended((prev) => prev.filter((u) => u._id !== id));
+      setExplore((prev) => prev.filter((u) => u._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  // ✅ instant UI update (no reload)
-  setRecommended((prev) => prev.filter((u) => u._id !== id));
-  setExplore((prev) => prev.filter((u) => u._id !== id));
-} catch (err) {
-  console.error(err);
-}
+  // ❌ SKIP
+  const handleSkip = async (id) => {
+    try {
+      await skipUser(id);
 
-};
+      setRecommended((prev) => prev.filter((u) => u._id !== id));
+      setExplore((prev) => prev.filter((u) => u._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-// ❌ SKIP
-const handleSkip = async (id) => {
-try {
-await skipUser(id);
+  // ✅ remove duplicates
+  const exploreFiltered = explore.filter(
+    (user) => !recommended.some((r) => r._id === user._id)
+  );
 
+  return (
+    <div className="bg-gray-50 min-h-screen px-6 py-8">
 
-  // ✅ instant UI update
-  setRecommended((prev) => prev.filter((u) => u._id !== id));
-  setExplore((prev) => prev.filter((u) => u._id !== id));
-} catch (err) {
-  console.error(err);
-}
+      {/* ⭐ RECOMMENDED */}
+      <div className="w-full max-w-6xl mx-auto">
+        <div className="flex items-center gap-2 mb-6">
+          <Sparkles className="text-indigo-500" size={22} />
+          <h2 className="text-2xl font-bold text-gray-800">
+            Recommended for You
+          </h2>
+        </div>
 
-};
+        {recommended.length > 0 ? (
+          <div className="flex flex-wrap gap-6 justify-center">
+            {recommended.slice(0, 3).map((user) => (
+              <UserCard
+                key={user._id}
+                user={user}
+                onLike={handleLike}
+                onSkip={handleSkip}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center">
+            No recommended users available
+          </p>
+        )}
+      </div>
 
-// ✅ remove duplicates from explore
-const exploreFiltered = explore.filter(
-(user) => !recommended.some((r) => r._id === user._id)
-);
+      {/* 🌍 EXPLORE */}
+      <div className="w-full max-w-6xl mx-auto mt-12">
+        <div className="flex items-center gap-2 mb-6">
+          <Compass className="text-blue-500" size={22} />
+          <h2 className="text-2xl font-bold text-gray-800">
+            Explore More Users
+          </h2>
+        </div>
 
-return ( <div className="flex flex-col items-center bg-gray-100 min-h-screen p-6">
+        {exploreFiltered.length > 0 ? (
+          <div className="flex flex-wrap gap-6 justify-center">
+            {exploreFiltered.map((user) => (
+              <UserCard
+                key={user._id}
+                user={user}
+                onLike={handleLike}
+                onSkip={handleSkip}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center">
+            No more users to explore
+          </p>
+        )}
+      </div>
 
-  {/* ⭐ RECOMMENDED */}
-  <h2 className="text-2xl font-bold mb-4">⭐ Recommended</h2>
+      {/* 🎉 EMPTY STATE */}
+      {recommended.length === 0 && exploreFiltered.length === 0 && (
+        <div className="flex flex-col items-center mt-16 text-gray-500">
+          <Sparkles size={40} className="mb-3 text-indigo-400" />
+          <h2 className="text-lg font-semibold">
+            You're all caught up!
+          </h2>
+          <p className="text-sm">Check back later for new users</p>
+        </div>
+      )}
 
-  {recommended.length > 0 ? (
-    <div className="flex flex-wrap gap-4 justify-center">
-      {recommended.slice(0, 3).map((user) => (
-        <UserCard
-          key={user._id}
-          user={user}
-          onLike={handleLike}
-          onSkip={handleSkip}
-        />
-      ))}
     </div>
-  ) : (
-    <p>No recommended users</p>
-  )}
-
-  {/* 🌍 EXPLORE */}
-  <h2 className="text-2xl font-bold mt-10 mb-4">🌍 Explore</h2>
-
-  <div className="flex flex-wrap gap-4 justify-center">
-    {exploreFiltered.length > 0 ? (
-      exploreFiltered.map((user) => (
-        <UserCard
-          key={user._id}
-          user={user}
-          onLike={handleLike}
-          onSkip={handleSkip}
-        />
-      ))
-    ) : (
-      <p>No more users</p>
-    )}
-  </div>
-
-  {/* 🎉 EMPTY STATE */}
-  {recommended.length === 0 && exploreFiltered.length === 0 && (
-    <h2 className="text-xl mt-10">No more users 🎉</h2>
-  )}
-
-</div>
-
-
-);
+  );
 };
 
 export default Discover;

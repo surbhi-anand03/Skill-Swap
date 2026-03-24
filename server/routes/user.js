@@ -127,5 +127,21 @@ router.post("/like/:id", auth, likeUser);
 // ❌ SKIP
 router.post("/skip/:id", auth, skipUser);
 
+router.get("/matches", auth, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.id);
+
+    const matches = await User.find({
+      _id: { $in: currentUser.likedUsers },
+      likedUsers: req.user.id
+    }).select("-password -otp -otpExpiry -__v");
+
+    res.json(matches);
+
+  } catch (err) {
+    console.error("MATCHES ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;
