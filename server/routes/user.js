@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/authMiddleware");
 const User = require("../models/User");
+const { getAllUsers } = require("../controllers/userController");
+
+// GET all users
+router.get("/all", getAllUsers);
 
 const {
   likeUser,

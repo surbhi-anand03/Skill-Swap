@@ -55,4 +55,14 @@ export const skipUser = (id) =>
 export const getMatchesList = () =>
   API.get("/user/matches");
 
+// ================= REQUESTS =================
+
+// ✅ Incoming requests (receiver = you)
+export const getIncomingRequests = () =>
+  API.get("/request/incoming");
+
+// ✅ Sent requests (sender = you → your /pending API)
+export const getSentRequests = () =>
+  API.get("/request/pending");
+
 export default API;
