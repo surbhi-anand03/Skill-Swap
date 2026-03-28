@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
 import Discover from "./pages/Discover";
 import Matches from "./pages/Matches";
+import Request from "./pages/Request";
 
 function App() {
   return (
@@ -71,6 +72,9 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        <Route path="/requests" element={<Request />} />
+
 
 
       </Routes>
