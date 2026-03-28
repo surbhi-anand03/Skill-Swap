@@ -357,14 +357,21 @@ router.post("/skip/:id", auth, skipUser);
 // ================= MATCHES =================
 router.get("/matches", auth, async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user.id);
+    const userId = req.user.id;
+
+    const currentUser = await User.findById(userId);
+
+    if (!currentUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const matches = await User.find({
       _id: { $in: currentUser.likedUsers },
-      likedUsers: req.user.id,
+      likedUsers: userId,
     }).select("-password -otp -otpExpiry -__v");
 
     res.json(matches);
+
   } catch (err) {
     console.error("MATCHES ERROR:", err);
     res.status(500).json({ error: err.message });
