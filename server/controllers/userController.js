@@ -8,11 +8,9 @@ exports.updateProfile = async (req, res) => {
 
     let { name, skillsOffered, skillsWanted, bio } = req.body;
 
-    // ✅ Safety (avoid crash if undefined)
     skillsOffered = skillsOffered || [];
     skillsWanted = skillsWanted || [];
 
-    // ✅ Normalize skills
     const formattedSkillsOffered = skillsOffered.map(s => s.toLowerCase());
     const formattedSkillsWanted = skillsWanted.map(s => s.toLowerCase());
 
@@ -35,60 +33,21 @@ exports.updateProfile = async (req, res) => {
 };
 
 
-
-// ================= LIKE USER =================
-exports.likeUser = async (req, res) => {
+// ================= GET ALL USERS =================
+exports.getAllUsers = async (req, res) => {
   try {
-    const currentUserId = req.user.id;
-    const targetUserId = req.params.id;
+    const currentUserId = req.user?.id;
 
-    // ❌ Prevent liking yourself
-    if (currentUserId === targetUserId) {
-      return res.status(400).json({ message: "You cannot like yourself" });
-    }
+    const users = await User.find({
+      _id: { $ne: currentUserId }
+    }).select("-password");
 
-    // 1️⃣ Save like
-    await User.findByIdAndUpdate(currentUserId, {
-      $addToSet: { likedUsers: targetUserId }
-    });
-
-    // 2️⃣ Check if reverse request exists (MATCH)
-    const existingRequest = await Request.findOne({
-      sender: targetUserId,
-      receiver: currentUserId
-    });
-
-    if (existingRequest) {
-      existingRequest.status = "accepted";
-      await existingRequest.save();
-
-      return res.json({ message: "It's a match!" });
-    }
-
-    // 3️⃣ Avoid duplicate request
-    const alreadySent = await Request.findOne({
-      sender: currentUserId,
-      receiver: targetUserId
-    });
-
-    if (alreadySent) {
-      return res.json({ message: "Request already sent" });
-    }
-
-    // 4️⃣ Create request
-    await Request.create({
-      sender: currentUserId,
-      receiver: targetUserId,
-      status: "pending"
-    });
-
-    res.json({ message: "Request sent!" });
+    res.json(users);
 
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 
 // ================= SKIP USER =================
@@ -97,11 +56,24 @@ exports.skipUser = async (req, res) => {
     const currentUserId = req.user.id;
     const targetUserId = req.params.id;
 
-    await User.findByIdAndUpdate(currentUserId, {
-      $addToSet: { skippedUsers: targetUserId }
+    let existing = await Request.findOne({
+      sender: currentUserId,
+      receiver: targetUserId
     });
 
-    res.json({ message: "Skipped successfully" });
+    if (existing) {
+      existing.status = "skipped";
+      await existing.save();
+      return res.json({ message: "User skipped" });
+    }
+
+    await Request.create({
+      sender: currentUserId,
+      receiver: targetUserId,
+      status: "skipped"
+    });
+
+    res.json({ message: "User skipped" });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -109,13 +81,25 @@ exports.skipUser = async (req, res) => {
 };
 
 
-
-// ================= GET ALL USERS =================
-exports.getAllUsers = async (req, res) => {
+// ================= LIKE USER =================
+exports.likeUser = async (req, res) => {
   try {
-    const users = await User.find().select("_id email skillsOffered skillsWanted");
+    const currentUserId = req.user.id;
+    const targetUserId = req.params.id;
 
-    res.json(users);
+    const existing = await Request.findOne({
+      sender: targetUserId,
+      receiver: currentUserId,
+      status: "pending"
+    });
+
+    if (existing) {
+      existing.status = "accepted";
+      await existing.save();
+      return res.json({ message: "Match created" });
+    }
+
+    res.json({ message: "Liked" });
 
   } catch (err) {
     res.status(500).json({ error: err.message });

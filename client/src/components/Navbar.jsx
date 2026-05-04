@@ -12,10 +12,17 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // const handleLogout = () => {
+  //   localStorage.removeItem("token");
+  //   navigate("/");
+  // };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     navigate("/");
   };
+
 
   const navItem = (path, icon, label) => (
     <Link

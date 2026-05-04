@@ -1,133 +1,52 @@
-// const Request = require("../models/Request");
-// const Match = require("../models/Match");
-
-
-// // Send Request
-// exports.sendRequest = async (req, res) => {
-//   try {
-//     console.log("🔥 SEND REQUEST HIT"); // 1
-
-//     console.log("FROM USER:", req.user.id); // 2
-
-//     console.log("TO USER:", req.params.id); // 3
-
-//     const { receiverId } = req.body;
-
-//     const request = await Request.create({
-//       sender: req.user.id,
-//       receiver: receiverId,
-//     });
-
-//     res.json(request);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-// // Incoming Requests
-// exports.getIncoming = async (req, res) => {
-//   try {
-//     const requests = await Request.find({
-//       receiver: req.user.id,
-//       status: "pending",
-//     }).populate("sender");
-
-//     res.json(requests);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-// // Pending Requests
-// exports.getPending = async (req, res) => {
-//   try {
-//     const requests = await Request.find({
-//       sender: req.user.id,
-//       status: "pending",
-//     }).populate("receiver");
-
-//     res.json(requests);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-// // Accept
-// exports.acceptRequest = async (req, res) => {
-//   try {
-//     const request = await Request.findById(req.params.id);
-
-//     if (!request) {
-//       return res.status(404).json({ msg: "Request not found" });
-//     }
-
-//     // Update status
-//     request.status = "accepted";
-//     await request.save();
-
-//     // 🔥 Create match
-//     const existingMatch = await Match.findOne({
-//       users: { $all: [request.sender, request.receiver] },
-//     });
-
-//     if (!existingMatch) {
-//       await Match.create({
-//         users: [request.sender, request.receiver],
-//       });
-//     }
-
-//     res.json({ msg: "Request accepted & match created" });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-// // Reject
-// exports.rejectRequest = async (req, res) => {
-//   try {
-//     const request = await Request.findByIdAndUpdate(
-//       req.params.id,
-//       { status: "rejected" },
-//       { new: true }
-//     );
-
-//     res.json(request);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
 const Request = require("../models/Request");
-const Match = require("../models/Match");
-const User = require("../models/User"); // ✅ ADD THIS
+const User = require("../models/User");
+
 
 // ================= SEND REQUEST =================
+
 exports.sendRequest = async (req, res) => {
   try {
     const { receiverId } = req.body;
+    const senderId = req.user.id;
 
-    // 🔥 prevent duplicate request
+    if (senderId === receiverId) {
+      return res.status(400).json({ msg: "Cannot send to yourself" });
+    }
+
+    // 🔍 check BOTH directions
     const existing = await Request.findOne({
-      sender: req.user.id,
+      $or: [
+        { sender: senderId, receiver: receiverId },
+        { sender: receiverId, receiver: senderId },
+      ],
+    });
+
+    if (existing) {
+      if (existing.status === "pending") {
+        return res.status(400).json({ msg: "Request already sent" });
+      }
+
+      if (existing.status === "accepted") {
+        return res.status(400).json({ msg: "Already matched" });
+      }
+
+      // ignored/skipped → allow new request
+    }
+
+    // ✅ ALWAYS create NEW request
+    const request = await Request.create({
+      sender: senderId,
       receiver: receiverId,
       status: "pending",
     });
 
-    if (existing) {
-      return res.status(400).json({ msg: "Request already sent" });
-    }
-
-    const request = await Request.create({
-      sender: req.user.id,
-      receiver: receiverId,
-    });
-
-    res.json(request);
+    res.json({ msg: "Request sent", request });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // ================= GET INCOMING =================
 exports.getIncoming = async (req, res) => {
@@ -136,6 +55,28 @@ exports.getIncoming = async (req, res) => {
       receiver: req.user.id,
       status: "pending",
     }).populate("sender", "name");
+
+    res.json(requests);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ================= GET SKIPPED =================
+exports.getSkipped = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const requests = await Request.find({
+      status: "skipped",
+      $or: [
+        { sender: userId },
+        { receiver: userId },
+      ],
+    })
+      .populate("sender", "name")
+      .populate("receiver", "name");
 
     res.json(requests);
   } catch (err) {
@@ -152,13 +93,13 @@ exports.getPending = async (req, res) => {
     }).populate("receiver", "name");
 
     res.json(requests);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
 
-// ================= 🔥 MAIN CONTROL API =================
 exports.respondRequest = async (req, res) => {
   try {
     const { requestId, action } = req.body;
@@ -170,51 +111,50 @@ exports.respondRequest = async (req, res) => {
       return res.status(404).json({ msg: "Request not found" });
     }
 
-    // ✅ allow both users
-    if (
-      request.sender.toString() !== userId &&
-      request.receiver.toString() !== userId
-    ) {
+    // ✅ Both sender and receiver must be involved
+    const isInvolved =
+      request.receiver.toString() === userId ||
+      request.sender.toString() === userId;
+
+    if (!isInvolved) {
       return res.status(403).json({ msg: "Not authorized" });
     }
 
-    // 🔥 HANDLE ACTIONS
-    if (action === "accept") {
+    if (action === "accepted") {
       request.status = "accepted";
 
-      // ✅ MATCH LOGIC (IMPORTANT)
-      await User.findByIdAndUpdate(request.sender, {
-        $addToSet: { likedUsers: request.receiver },
+      // ✅ Clean up duplicate requests between these two users
+      await Request.deleteMany({
+        $or: [
+          { sender: request.sender, receiver: request.receiver },
+          { sender: request.receiver, receiver: request.sender },
+        ],
+        _id: { $ne: request._id },
       });
 
-      await User.findByIdAndUpdate(request.receiver, {
-        $addToSet: { likedUsers: request.sender },
-      });
-
-      // (optional) also create Match doc
-      const existingMatch = await Match.findOne({
-        users: { $all: [request.sender, request.receiver] },
-      });
-
-      if (!existingMatch) {
-        await Match.create({
-          users: [request.sender, request.receiver],
-        });
-      }
-
-    } else if (action === "skip") {
-      request.status = "skipped";
-
-    } else if (action === "ignore") {
+    } else if (action === "ignored") {
       request.status = "ignored";
+    } else if (action === "skipped") {
+      request.status = "skipped";
+    } else {
+      return res.status(400).json({ msg: "Invalid action" });
     }
 
     await request.save();
-
-    res.json({ msg: `Request ${action}ed`, request });
+    res.json({ msg: `Request ${action}`, request });
 
   } catch (err) {
     console.error("RESPOND ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ================= GET ALL USERS =================
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    res.json(users);
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
