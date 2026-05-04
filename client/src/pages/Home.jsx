@@ -4,11 +4,6 @@ import "./Home.css";
 export default function Home() {
   const navigate = useNavigate();
 
-  // const handleLogout = () => {
-  //   localStorage.removeItem("token");
-  //   navigate("/");
-  // };
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
@@ -19,7 +14,8 @@ export default function Home() {
   return (
     <div className="home-container">
       <h1>Welcome to SkillSwap</h1>
-      <p>Start exchanging skills 🚀</p>
+      <p>Start exchanging skills with SkillSwap🚀</p>
+      <p>Explore</p>
 
       <button onClick={handleLogout}>Logout</button>
     </div>
