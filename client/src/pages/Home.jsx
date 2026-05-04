@@ -4,10 +4,17 @@ import "./Home.css";
 export default function Home() {
   const navigate = useNavigate();
 
+  // const handleLogout = () => {
+  //   localStorage.removeItem("token");
+  //   navigate("/");
+  // };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     navigate("/");
   };
+
 
   return (
     <div className="home-container">

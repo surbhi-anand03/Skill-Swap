@@ -3,7 +3,7 @@ import {
   forgotPasswordOtp,
   verifyOtp,
   resetPassword,
-} from "../api/auth";
+} from "../api/api";
 import { useNavigate } from "react-router-dom";
 import "./ForgotPassword.css";
 

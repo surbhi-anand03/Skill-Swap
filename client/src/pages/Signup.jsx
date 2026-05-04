@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { requestOtp } from "../api/auth";
+import { requestOtp } from "../api/api";
 import "./Signup.css";
 
 export default function Signup() {

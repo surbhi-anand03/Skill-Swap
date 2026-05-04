@@ -2,11 +2,15 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/authMiddleware");
 const User = require("../models/User");
-
+const Request = require("../models/Request");
 const {
+  getAllUsers,
   likeUser,
   skipUser
 } = require("../controllers/userController");
+
+// GET all users
+router.get("/all", getAllUsers);
 
 
 // GET profile
@@ -31,89 +35,84 @@ router.put("/profile", auth, async (req, res) => {
   res.json(user);
 });
 
-// 🔥 GET MATCHED USERS (DISCOVER)
-router.get("/match", auth, async (req, res) => {
+const mongoose = require("mongoose"); // ← add at top of file if not there
+
+router.get("/discover", auth, async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user.id);
+    const userId = req.user.id;
 
-    console.log("CURRENT USER:", currentUser._id);
-    console.log("LIKED:", currentUser.likedUsers);
-    console.log("SKIPPED:", currentUser.skippedUsers);
+    const currentUser = await User.findById(userId);
 
+    const requests = await Request.find({
+      $or: [{ sender: userId }, { receiver: userId }],
+    });
 
-    const excludedUsers = [
-      ...currentUser.likedUsers,
-      ...currentUser.skippedUsers,
-      req.user.id
-    ];
+    // ✅ Build set of all interacted user IDs (as strings)
+    const relatedUserIds = new Set();
+    // requests.forEach((r) => {
+    //   if (r.sender.toString() === userId) {
+    //     relatedUserIds.add(r.receiver.toString());
+    //   } else {
+    //     relatedUserIds.add(r.sender.toString());
+    //   }
+    // });
 
-    const users = await User.find(
-      { _id: { $nin: excludedUsers } },
-      "-password -otp -otpExpiry -__v"
+    requests.forEach((r) => {
+      relatedUserIds.add(r.sender.toString());
+      relatedUserIds.add(r.receiver.toString());
+    });
+
+    relatedUserIds.delete(userId);
+    
+    // ✅ Convert strings → ObjectIds for $nin
+    const relatedIdsAsObjectIds = Array.from(relatedUserIds).map(
+      (id) => new mongoose.Types.ObjectId(id)
     );
 
-const processedUsers = users.map((user) => {
-  const currentWanted = currentUser.skillsWanted || [];
-  const currentOffered = currentUser.skillsOffered || [];
+    // ✅ Filter at DB level
+    // const users = await User.find({
+    //   _id: {
+    //     $ne: new mongoose.Types.ObjectId(userId),
+    //     $nin: relatedIdsAsObjectIds,
+    //   },
+    // });
 
-  const userOffered = user.skillsOffered || [];
-  const userWanted = user.skillsWanted || [];
+    const users = await User.find({
+      _id: { $nin: relatedIdsAsObjectIds }
+    });
 
-  const offeredMatch = userOffered.filter(skill =>
-    skill && currentWanted
-      .map(s => s?.toLowerCase())
-      .includes(skill.toLowerCase())
-  ).length;
+    const normalize = (arr) => (arr || []).map((s) => s.toLowerCase().trim());
+    const currentOffered = normalize(currentUser.skillsOffered);
+    const currentWanted = normalize(currentUser.skillsWanted);
 
-  const wantedMatch = userWanted.filter(skill =>
-    skill && currentOffered
-      .map(s => s?.toLowerCase())
-      .includes(skill.toLowerCase())
-  ).length;
+    const processedUsers = users.map((user) => {
+      const otherOffered = normalize(user.skillsOffered);
+      const otherWanted = normalize(user.skillsWanted);
 
-  // ✅ REAL match score
-  const matchScore = offeredMatch + wantedMatch;
+      const offeredMatchCount = otherOffered.filter((skill) =>
+        currentWanted.includes(skill)
+      ).length;
 
-  // ✅ max possible score
-  const maxScore = currentWanted.length + currentOffered.length;
+      const wantedMatchCount = otherWanted.filter((skill) =>
+        currentOffered.includes(skill)
+      ).length;
 
-  // ✅ percentage
-  const matchPercentage =
-    maxScore === 0 ? 0 : Math.round((matchScore / maxScore) * 100);
+      const swapScore = offeredMatchCount * 2 + wantedMatchCount * 2;
 
-  const userObj = user.toObject();
+      return {
+        ...user.toObject(),
+        swapScore,
+        requestStatus: null,
+        requestId: null,
+        isSender: false,
+      };
+    });
 
-  delete userObj.password;
-  delete userObj.otp;
-  delete userObj.otpExpiry;
-  delete userObj.__v;
+    processedUsers.sort((a, b) => b.swapScore - a.swapScore);
 
-  return {
-    ...userObj,
-    matchScore,
-    matchPercentage,
-  };
-});
-
-    // 🔥 Separate users
-    const matchedUsers = processedUsers
-      .filter(user => user.matchScore > 0)
-      .sort((a, b) => b.matchScore - a.matchScore);
-
-    const nonMatchedUsers = processedUsers
-      .filter(user => user.matchScore === 0);
-
-    // logs
-    console.log("======== MATCHED USERS ========");
-    console.log(matchedUsers);
-
-    console.log("======== NON-MATCHED USERS ========");
-    console.log(nonMatchedUsers);
-
-    // ✅ FINAL RESPONSE
     res.json({
-      recommended: matchedUsers,
-      allUsers: nonMatchedUsers,
+      recommended: processedUsers.filter((u) => u.swapScore > 0),
+      allUsers: processedUsers.filter((u) => u.swapScore === 0),
     });
 
   } catch (err) {
@@ -121,27 +120,124 @@ const processedUsers = users.map((user) => {
   }
 });
 
+// router.get("/discover", auth, async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+
+//     const currentUser = await User.findById(userId);
+
+//     const requests = await Request.find({
+//       $or: [{ sender: userId }, { receiver: userId }],
+//     });
+
+    
+
+//     // ✅ Build set of all interacted users
+//     const relatedUserIds = new Set();
+//     requests.forEach((r) => {
+//       if (r.sender.toString() === userId) {
+//         relatedUserIds.add(r.receiver.toString());
+//       } else {
+//         relatedUserIds.add(r.sender.toString());
+//       }
+//     });
+
+//     // ✅ Fetch only users not in relatedUserIds and not self
+//     const users = await User.find({
+//       _id: { $ne: userId, $nin: Array.from(relatedUserIds) },
+//     });
+
+//     const normalize = (arr) => (arr || []).map((s) => s.toLowerCase().trim());
+//     const currentOffered = normalize(currentUser.skillsOffered);
+//     const currentWanted = normalize(currentUser.skillsWanted);
+
+//     // ✅ No null checks needed — all users here are fresh
+//     const processedUsers = users.map((user) => {
+//       const otherOffered = normalize(user.skillsOffered);
+//       const otherWanted = normalize(user.skillsWanted);
+
+//       const offeredMatchCount = otherOffered.filter((skill) =>
+//         currentWanted.includes(skill)
+//       ).length;
+
+//       const wantedMatchCount = otherWanted.filter((skill) =>
+//         currentOffered.includes(skill)
+//       ).length;
+
+//       const swapScore = offeredMatchCount * 2 + wantedMatchCount * 2;
+
+//       return {
+//         ...user.toObject(),
+//         swapScore,
+//         requestStatus: null,
+//         requestId: null,
+//         isSender: false,
+//       };
+//     });
+
+//     processedUsers.sort((a, b) => b.swapScore - a.swapScore);
+
+//     res.json({
+//       recommended: processedUsers.filter((u) => u.swapScore > 0),
+//       allUsers: processedUsers.filter((u) => u.swapScore === 0),
+//     });
+
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
 // ❤️ LIKE
 router.post("/like/:id", auth, likeUser);
 
 // ❌ SKIP
 router.post("/skip/:id", auth, skipUser);
 
+
 router.get("/matches", auth, async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user.id);
+    const userId = req.user.id;
 
-    const matches = await User.find({
-      _id: { $in: currentUser.likedUsers },
-      likedUsers: req.user.id
-    }).select("-password -otp -otpExpiry -__v");
+    const requests = await Request.find({
+      status: "accepted",
+      $or: [
+        { sender: userId },
+        { receiver: userId },
+      ],
+    })
+      .populate("sender", "name email skillsOffered skillsWanted bio")
+      .populate("receiver", "name email skillsOffered skillsWanted bio");
 
-    res.json(matches);
+    // const matches = requests.map((r) => {
+    //   if (r.sender._id.toString() === userId) {
+    //     return r.receiver;
+    //   }
+    //   return r.sender;
+    // });
 
+    // res.json(matches);
+
+    const uniqueMatches = [];
+    const seen = new Set();
+
+    requests.forEach((r) => {
+      const otherUser =
+        r.sender._id.toString() === userId
+          ? r.receiver
+          : r.sender;
+
+      if (!seen.has(otherUser._id.toString())) {
+        seen.add(otherUser._id.toString());
+        uniqueMatches.push(otherUser);
+      }
+    });
+
+res.json(uniqueMatches);
   } catch (err) {
-    console.error("MATCHES ERROR:", err);
+    console.error("MATCH ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 module.exports = router;

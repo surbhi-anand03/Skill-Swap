@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { registerUser } from "../api/auth";
+import { registerUser } from "../api/api";
 import "./CompleteProfile.css";
 
 export default function CompleteProfile() {

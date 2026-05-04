@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loginUser } from "../api/auth";
+import { loginUser } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
@@ -13,21 +13,39 @@ export default function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await loginUser(form);
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const res = await loginUser(form);
 
-      alert("Login successful 🚀");
+  //     alert("Login successful 🚀");
 
-      localStorage.setItem("token", res.data.token);
-      navigate("/home");
-      console.log("LOGIN TOKEN:", res.data.token);
+  //     localStorage.setItem("token", res.data.token);
+  //     navigate("/home");
+  //     console.log("LOGIN TOKEN:", res.data.token);
 
-    } catch (err) {
-      alert(err.response?.data?.message || "Error");
-    }
-  };
+  //   } catch (err) {
+  //     alert(err.response?.data?.message || "Error");
+  //   }
+  // };
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+
+      try {
+        const res = await loginUser(form);
+
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("userId", res.data.user._id);
+
+        alert("Login successful 🚀");
+
+        navigate("/home");
+      } catch (err) {
+        alert(err.response?.data?.message || "Error");
+      }
+    };
+
 
   return (
     <div className="login-container">

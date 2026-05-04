@@ -1,10 +1,10 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // ✅ FIXED
+  baseURL: "http://localhost:5000/api",
 });
 
-// attach token
+// ================= TOKEN INTERCEPTOR =================
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
 
@@ -42,7 +42,7 @@ export const getProfile = () =>
 
 // ================= DISCOVER =================
 export const getMatches = () =>
-  API.get("/user/match"); // ✅ NEW
+  API.get("/user/discover"); // ✅ correct endpoint
 
 export const likeUser = (id) =>
   API.post(`/user/like/${id}`);
@@ -51,8 +51,48 @@ export const skipUser = (id) =>
   API.post(`/user/skip/${id}`);
 
 // ================= MATCHES =================
-
 export const getMatchesList = () =>
   API.get("/user/matches");
 
+// ================= REQUESTS =================
+
+// ✅ SEND / RESEND REQUEST
+export const sendRequest = (id) =>
+  API.post("/request/send", { receiverId: id });
+
+export const getSkippedRequests = () =>
+  API.get("/request/skipped");
+
+// ✅ RESPOND (accept / ignore / skip)
+export const respondRequest = (requestId, action) =>
+  API.post("/request/respond", { requestId, action });
+
+
+export const getAllRequests = async () => {
+  const [incoming, pending] = await Promise.all([
+    API.get("/request/incoming"),
+    API.get("/request/pending"),
+  ]);
+
+  return {
+    data: {
+      incoming: (incoming.data || []).filter(
+        (req) => req.status === "pending"
+      ),
+      pendingSent: (pending.data || []).filter(
+        (req) => req.status === "pending"
+      ),
+    },
+  };
+};
+
+
+// 🔹 OPTIONAL APIs (only if you want separate calls)
+export const getIncomingRequests = () =>
+  API.get("/request/incoming");
+
+export const getSentRequests = () =>
+  API.get("/request/pending");
+
+// ================= EXPORT =================
 export default API;

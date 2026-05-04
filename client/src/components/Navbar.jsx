@@ -4,17 +4,25 @@ import {
   FaHome,
   FaSearch,
   FaUsers,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaBell 
 } from "react-icons/fa";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // const handleLogout = () => {
+  //   localStorage.removeItem("token");
+  //   navigate("/");
+  // };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     navigate("/");
   };
+
 
   const navItem = (path, icon, label) => (
     <Link
@@ -49,6 +57,7 @@ export default function Navbar() {
         {navItem("/discover", <FaSearch />, "Discover")}
         {navItem("/matches", <FaUsers />, "Matches")}
         {navItem("/profile", <FaUserCircle />, "Profile")}
+        {navItem("/requests", <FaBell />, "Requests")}
 
         {/* 🚪 Logout */}
         <button
