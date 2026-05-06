@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 const requestRoutes = require("./routes/request");
 const matchRoutes = require("./routes/match");
+const sessionRoutes = require("./routes/session");
 
 dotenv.config();
 connectDB();
@@ -19,6 +20,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/request", requestRoutes);
 app.use("/api/match", matchRoutes);
+app.use("/api/session", sessionRoutes);
+
 app.get("/", (req, res) => {
   res.send("API running...");
 });

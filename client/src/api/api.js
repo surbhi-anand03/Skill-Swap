@@ -94,5 +94,20 @@ export const getIncomingRequests = () =>
 export const getSentRequests = () =>
   API.get("/request/pending");
 
+export const createSession = (data) =>
+  API.post("/session/create", data);
+
+export const acceptSession = (id) =>
+  API.patch(`/session/${id}/accept`);
+
+export const rejectSession = (id) =>
+  API.patch(`/session/${id}/reject`);
+
+export const getSessions = () =>
+  API.get("/session/my");
+
+export const joinSession = (id) =>
+  API.get(`/session/${id}/join`);
+
 // ================= EXPORT =================
 export default API;

@@ -11,6 +11,7 @@ import Navbar from "./components/Navbar";
 import Discover from "./pages/Discover";
 import Matches from "./pages/Matches";
 import Requests from "./pages/Requests";
+import Sessions from "./pages/Sessions";
 
 function App() {
   return (
@@ -83,7 +84,19 @@ function App() {
             </PrivateRoute>
           }
         />
-         
+
+        <Route
+          path="/sessions"
+          element={
+            <PrivateRoute>
+              <>
+                <Navbar />
+                <Sessions />
+              </>
+            </PrivateRoute>
+          }
+        />
+                
         
 
 
