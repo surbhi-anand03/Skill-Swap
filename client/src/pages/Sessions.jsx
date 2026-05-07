@@ -1,26 +1,31 @@
 import { useEffect, useState } from "react";
+
 import {
   getSessions,
   acceptSession,
   rejectSession,
   joinSession,
+  completeSession,
 } from "../api/api";
 
 export default function Sessions() {
-  // inside Sessions component
-  const currentUserId = localStorage.getItem("userId");
+
   const [data, setData] = useState({
     pending: [],
     upcoming: [],
     completed: [],
   });
 
+  const userId = localStorage.getItem("userId");
+
   const fetchSessions = async () => {
     try {
       const res = await getSessions();
+
       setData(res.data);
+
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   };
 
@@ -28,114 +33,256 @@ export default function Sessions() {
     fetchSessions();
   }, []);
 
+  /* ================= ACCEPT ================= */
+
   const handleAccept = async (id) => {
-    await acceptSession(id);
-    fetchSessions();
+    try {
+
+      await acceptSession(id);
+
+      fetchSessions();
+
+    } catch (err) {
+      console.log(err);
+      alert(err.response.data.message);
+    }
   };
+
+  /* ================= REJECT ================= */
 
   const handleReject = async (id) => {
-    await rejectSession(id);
-    fetchSessions();
+    try {
+
+      await rejectSession(id);
+
+      fetchSessions();
+
+    } catch (err) {
+      console.log(err);
+    }
   };
 
+  /* ================= JOIN ================= */
+
+  // const handleJoin = async (id) => {
+  //   try {
+
+  //     const res = await joinSession(id);
+
+  //     window.open(
+  //       res.data.meetingLink,
+  //       "_blank"
+  //     );
+
+  //   } catch (err) {
+  //     alert(err.response.data.message);
+  //   }
+  // };
+
   const handleJoin = async (id) => {
-    const res = await joinSession(id);
-    window.open(res.data.meetingLink, "_blank");
+    try {
+      const res = await joinSession(id);
+
+      window.open(res.data.meetingLink, "_blank");
+
+    } catch (err) {
+      alert(
+        err.response?.data?.message ||
+        "Cannot join session"
+      );
+    }
+  };
+
+  /* ================= COMPLETE ================= */
+
+  const handleComplete = async (id) => {
+    try {
+
+      await completeSession(id);
+
+      fetchSessions();
+
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
     <div className="p-6">
 
-      <h2 className="text-2xl font-bold mb-6 text-center">
+      <h2 className="text-3xl font-bold text-center mb-8">
         Sessions
       </h2>
 
-      {/* 🔹 PENDING */}
-      <h3 className="text-lg font-semibold mb-3">Pending</h3>
-      {/* {data.pending.map((s) => (
-        <div key={s._id} className="bg-white p-3 shadow mb-2 flex justify-between">
-          <p>
-            {s.users.map(u => u.name).join(", ")}
-          </p>
+      {/* ================= PENDING ================= */}
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleAccept(s._id)}
-              className="bg-green-500 text-white px-3 py-1 rounded"
-            >
-              Accept
-            </button>
-
-            <button
-              onClick={() => handleReject(s._id)}
-              className="bg-red-500 text-white px-3 py-1 rounded"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-      ))} */}
+      <h3 className="text-xl font-semibold mb-4">
+        Pending
+      </h3>
 
       {data.pending.map((s) => {
-        const isCreator = s.createdBy === currentUserId;
+
+        const isCreator =
+          s.createdBy === userId;
 
         return (
           <div
             key={s._id}
-            className="bg-white p-3 shadow mb-2 flex justify-between"
+            className="bg-white shadow p-4 rounded mb-4"
           >
-            <p>{s.users.map((u) => u.name).join(", ")}</p>
 
-            <div className="flex gap-2">
+            <p className="font-semibold">
+              {s.users.map(u => u.name).join(", ")}
+            </p>
 
-              {/* ✅ Creator sees waiting */}
+            <p className="text-sm text-gray-500">
+              {s.type}
+            </p>
+
+            {s.scheduledDate && (
+              <p className="text-sm text-gray-500">
+                {new Date(
+                  s.scheduledDate
+                ).toLocaleDateString()}
+                {" "}
+                {s.startTime}
+              </p>
+            )}
+
+            <div className="mt-3">
+
               {isCreator ? (
-                <span className="text-gray-500 text-sm">
-                  Waiting for response...
-                </span>
+
+                <button
+                  className="bg-yellow-500 text-white px-4 py-2 rounded"
+                >
+                  Waiting...
+                </button>
+
               ) : (
-                <>
-                  {/* ✅ Only receiver sees buttons */}
+
+                <div className="flex gap-3">
+
                   <button
                     onClick={() => handleAccept(s._id)}
-                    className="bg-green-500 text-white px-3 py-1 rounded"
+                    className="bg-green-600 text-white px-4 py-2 rounded"
                   >
                     Accept
                   </button>
 
                   <button
                     onClick={() => handleReject(s._id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded"
+                    className="bg-red-600 text-white px-4 py-2 rounded"
                   >
                     Reject
                   </button>
-                </>
+
+                </div>
               )}
+
             </div>
+
           </div>
         );
       })}
 
-      {/* 🔹 UPCOMING */}
-      <h3 className="text-lg font-semibold mt-6 mb-3">Upcoming</h3>
-      {data.upcoming.map((s) => (
-        <div key={s._id} className="bg-white p-3 shadow mb-2 flex justify-between">
-          <p>{s.users.map(u => u.name).join(", ")}</p>
+      {/* ================= UPCOMING ================= */}
 
-          <button
-            onClick={() => handleJoin(s._id)}
-            className="bg-blue-500 text-white px-3 py-1 rounded"
-          >
-            Join
-          </button>
+      <h3 className="text-xl font-semibold mt-8 mb-4">
+        Upcoming
+      </h3>
+
+      {data.upcoming.map((s) => (
+
+        <div
+          key={s._id}
+          className="bg-white shadow p-4 rounded mb-4"
+        >
+
+          <p className="font-semibold">
+            {s.users.map(u => u.name).join(", ")}
+          </p>
+
+          <p className="text-sm text-gray-500">
+            {s.type}
+          </p>
+
+          {s.scheduledDate && (
+            <p className="text-sm text-gray-500">
+              {new Date(
+                s.scheduledDate
+              ).toLocaleDateString()}
+              {" "}
+              {s.startTime}
+            </p>
+          )}
+
+          <div className="flex gap-3 mt-3">
+
+            <button
+              onClick={() => handleJoin(s._id)}
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Join
+            </button>
+
+            <button
+              onClick={() => handleComplete(s._id)}
+              className="bg-gray-700 text-white px-4 py-2 rounded"
+            >
+              End Session
+            </button>
+
+          </div>
+
         </div>
       ))}
 
-      {/* 🔹 COMPLETED */}
-      <h3 className="text-lg font-semibold mt-6 mb-3">Completed</h3>
+      {/* ================= COMPLETED ================= */}
+
+      <h3 className="text-xl font-semibold mt-8 mb-4">
+        Completed
+      </h3>
+
       {data.completed.map((s) => (
-        <div key={s._id} className="bg-gray-200 p-3 mb-2">
-          {s.users.map(u => u.name).join(", ")}
+
+        <div
+          key={s._id}
+          className="bg-gray-100 shadow p-4 rounded mb-4"
+        >
+
+          <p className="font-semibold">
+            {s.users.map(u => u.name).join(", ")}
+          </p>
+
+          <p className="text-sm">
+            Type: {s.type}
+          </p>
+
+          {s.scheduledDate && (
+            <p className="text-sm">
+              Date:
+              {" "}
+              {new Date(
+                s.scheduledDate
+              ).toLocaleDateString()}
+            </p>
+          )}
+
+          <p className="text-sm">
+            Duration:
+            {" "}
+            {s.duration || "0 mins"}
+          </p>
+
+          <p className="text-sm">
+            Completed At:
+            {" "}
+            {new Date(
+              s.updatedAt
+            ).toLocaleString()}
+          </p>
+
         </div>
       ))}
 

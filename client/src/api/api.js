@@ -109,5 +109,8 @@ export const getSessions = () =>
 export const joinSession = (id) =>
   API.get(`/session/${id}/join`);
 
+export const completeSession = (id) =>
+  API.patch(`/session/${id}/complete`);
+
 // ================= EXPORT =================
 export default API;

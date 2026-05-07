@@ -18,14 +18,14 @@
 
 //     status: {
 //       type: String,
-//       enum: ["pending", "active", "completed", "rejected"],
+//       enum: ["pending", "confirmed", "completed", "rejected"],
 //       default: "pending",
 //     },
 
 //     type: {
 //       type: String,
 //       enum: ["instant", "scheduled"],
-//       default: "instant",
+//       default: "scheduled",
 //     },
 
 //     scheduledDate: Date,
@@ -58,7 +58,12 @@ const sessionSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "confirmed", "completed", "rejected"],
+      enum: [
+        "pending",
+        "confirmed",
+        "completed",
+        "rejected",
+      ],
       default: "pending",
     },
 
@@ -69,9 +74,16 @@ const sessionSchema = new mongoose.Schema(
     },
 
     scheduledDate: Date,
+
     startTime: String,
 
     meetingLink: String,
+
+    joinedAt: Date,
+
+    endedAt: Date,
+
+    duration: String,
   },
   { timestamps: true }
 );
