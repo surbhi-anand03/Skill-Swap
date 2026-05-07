@@ -4,6 +4,7 @@ import {
   FaHome,
   FaSearch,
   FaUsers,
+  FaVideo, 
   FaSignOutAlt,
   FaBell 
 } from "react-icons/fa";
@@ -56,6 +57,7 @@ export default function Navbar() {
         {navItem("/home", <FaHome />, "Home")}
         {navItem("/discover", <FaSearch />, "Discover")}
         {navItem("/matches", <FaUsers />, "Matches")}
+        {navItem("/sessions", <FaVideo />, "Sessions")} 
         {navItem("/profile", <FaUserCircle />, "Profile")}
         {navItem("/requests", <FaBell />, "Requests")}
 
