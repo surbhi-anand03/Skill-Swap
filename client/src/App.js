@@ -1,31 +1,35 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import VerifyOtp from "./pages/VerifyOtp";
 import ForgotPassword from "./pages/ForgotPassword";
 import CompleteProfile from "./pages/CompleteProfile";
+
 import PrivateRoute from "./components/PrivateRoute";
+import Navbar from "./components/Navbar";
+
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
-import Navbar from "./components/Navbar";
 import Discover from "./pages/Discover";
 import Matches from "./pages/Matches";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
+import Chat from "./pages/Chat";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* 🔓 PUBLIC ROUTES (NO NAVBAR) */}
+        {/* PUBLIC */}
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/complete-profile" element={<CompleteProfile />} />
 
-        {/* 🔒 PROTECTED ROUTES (WITH NAVBAR) */}
+        {/* HOME */}
         <Route
           path="/home"
           element={
@@ -38,6 +42,7 @@ function App() {
           }
         />
 
+        {/* PROFILE */}
         <Route
           path="/profile"
           element={
@@ -49,7 +54,8 @@ function App() {
             </PrivateRoute>
           }
         />
-        
+
+        {/* DISCOVER */}
         <Route
           path="/discover"
           element={
@@ -62,6 +68,7 @@ function App() {
           }
         />
 
+        {/* MATCHES */}
         <Route
           path="/matches"
           element={
@@ -73,6 +80,8 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        {/* REQUESTS */}
         <Route
           path="/requests"
           element={
@@ -85,6 +94,7 @@ function App() {
           }
         />
 
+        {/* SESSIONS */}
         <Route
           path="/sessions"
           element={
@@ -96,10 +106,19 @@ function App() {
             </PrivateRoute>
           }
         />
-                
-        
 
-
+        {/* CHAT */}
+        <Route
+          path="/chat/:id"
+          element={
+            <PrivateRoute>
+              <>
+                <Navbar />
+                <Chat />
+              </>
+            </PrivateRoute>
+          }
+        />
 
       </Routes>
     </BrowserRouter>

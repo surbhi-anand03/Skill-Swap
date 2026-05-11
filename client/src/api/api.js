@@ -112,5 +112,14 @@ export const joinSession = (id) =>
 export const completeSession = (id) =>
   API.patch(`/session/${id}/complete`);
 
+// SEND MESSAGE
+export const sendMessage = (data) =>
+  API.post("/chat/send", data);
+
+
+// GET MESSAGES
+export const getMessages = (user1, user2) =>
+  API.get(`/chat/${user1}/${user2}`);
+
 // ================= EXPORT =================
 export default API;
