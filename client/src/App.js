@@ -16,6 +16,8 @@ import Matches from "./pages/Matches";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Chat from "./pages/Chat";
+import VideoRoom from "./pages/VideoRoom";
+
 
 function App() {
   return (
@@ -115,6 +117,18 @@ function App() {
               <>
                 <Navbar />
                 <Chat />
+              </>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/video/:id"
+          element={
+            <PrivateRoute>
+              <>
+                <Navbar />
+                <VideoRoom />
               </>
             </PrivateRoute>
           }

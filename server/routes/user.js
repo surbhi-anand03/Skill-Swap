@@ -49,14 +49,6 @@ router.get("/discover", auth, async (req, res) => {
 
     // ✅ Build set of all interacted user IDs (as strings)
     const relatedUserIds = new Set();
-    // requests.forEach((r) => {
-    //   if (r.sender.toString() === userId) {
-    //     relatedUserIds.add(r.receiver.toString());
-    //   } else {
-    //     relatedUserIds.add(r.sender.toString());
-    //   }
-    // });
-
     requests.forEach((r) => {
       relatedUserIds.add(r.sender.toString());
       relatedUserIds.add(r.receiver.toString());
@@ -70,13 +62,7 @@ router.get("/discover", auth, async (req, res) => {
     );
 
     // ✅ Filter at DB level
-    // const users = await User.find({
-    //   _id: {
-    //     $ne: new mongoose.Types.ObjectId(userId),
-    //     $nin: relatedIdsAsObjectIds,
-    //   },
-    // });
-
+   
     const users = await User.find({
       _id: { $nin: relatedIdsAsObjectIds }
     });
@@ -120,73 +106,6 @@ router.get("/discover", auth, async (req, res) => {
   }
 });
 
-// router.get("/discover", auth, async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-
-//     const currentUser = await User.findById(userId);
-
-//     const requests = await Request.find({
-//       $or: [{ sender: userId }, { receiver: userId }],
-//     });
-
-    
-
-//     // ✅ Build set of all interacted users
-//     const relatedUserIds = new Set();
-//     requests.forEach((r) => {
-//       if (r.sender.toString() === userId) {
-//         relatedUserIds.add(r.receiver.toString());
-//       } else {
-//         relatedUserIds.add(r.sender.toString());
-//       }
-//     });
-
-//     // ✅ Fetch only users not in relatedUserIds and not self
-//     const users = await User.find({
-//       _id: { $ne: userId, $nin: Array.from(relatedUserIds) },
-//     });
-
-//     const normalize = (arr) => (arr || []).map((s) => s.toLowerCase().trim());
-//     const currentOffered = normalize(currentUser.skillsOffered);
-//     const currentWanted = normalize(currentUser.skillsWanted);
-
-//     // ✅ No null checks needed — all users here are fresh
-//     const processedUsers = users.map((user) => {
-//       const otherOffered = normalize(user.skillsOffered);
-//       const otherWanted = normalize(user.skillsWanted);
-
-//       const offeredMatchCount = otherOffered.filter((skill) =>
-//         currentWanted.includes(skill)
-//       ).length;
-
-//       const wantedMatchCount = otherWanted.filter((skill) =>
-//         currentOffered.includes(skill)
-//       ).length;
-
-//       const swapScore = offeredMatchCount * 2 + wantedMatchCount * 2;
-
-//       return {
-//         ...user.toObject(),
-//         swapScore,
-//         requestStatus: null,
-//         requestId: null,
-//         isSender: false,
-//       };
-//     });
-
-//     processedUsers.sort((a, b) => b.swapScore - a.swapScore);
-
-//     res.json({
-//       recommended: processedUsers.filter((u) => u.swapScore > 0),
-//       allUsers: processedUsers.filter((u) => u.swapScore === 0),
-//     });
-
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
 // ❤️ LIKE
 router.post("/like/:id", auth, likeUser);
 
@@ -207,15 +126,6 @@ router.get("/matches", auth, async (req, res) => {
     })
       .populate("sender", "name email skillsOffered skillsWanted bio")
       .populate("receiver", "name email skillsOffered skillsWanted bio");
-
-    // const matches = requests.map((r) => {
-    //   if (r.sender._id.toString() === userId) {
-    //     return r.receiver;
-    //   }
-    //   return r.sender;
-    // });
-
-    // res.json(matches);
 
     const uniqueMatches = [];
     const seen = new Set();

@@ -5,8 +5,11 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 
+require("./cron/sessionCron");
+
 const connectDB = require("./config/db");
 
+const initializeSessionSocket = require("./sockets/sessionSocket");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 const requestRoutes = require("./routes/request");
@@ -85,6 +88,7 @@ io.on("connection", (socket) => {
   });
 });
 
+initializeSessionSocket(io);
 
 // ================= START SERVER =================
 server.listen(5000, () => {
