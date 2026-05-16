@@ -8,9 +8,15 @@ export default function SessionModal({ user, close }) {
   // ⚡ Instant
   const handleInstant = async () => {
     try {
+      // await createSession({
+      //   participantUser: user._id,
+      //   type: "instant",
+      // });
+
       await createSession({
-        partnerId: user._id,
-        type: "instant",
+        participantUser: user._id,
+        sessionType: "instant",
+        skill: "",   // optional
       });
 
       alert("Instant session created 🚀");
@@ -28,11 +34,17 @@ export default function SessionModal({ user, close }) {
     }
 
     try {
+      // await createSession({
+      //   partnerId: user._id,
+      //   type: "scheduled",
+      //   scheduledDate: date,
+      //   startTime: time,
+      // });
+
       await createSession({
-        partnerId: user._id,
-        type: "scheduled",
-        scheduledDate: date,
-        startTime: time,
+        participantUser: user._id,
+        sessionType: "scheduled",
+        startTime: new Date(`${date}T${time}`),
       });
 
       alert("Session scheduled 📅");

@@ -2,57 +2,97 @@
 
 // const sessionSchema = new mongoose.Schema(
 //   {
-//     users: [
-//       {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: "User",
-//         required: true,
-//       },
-//     ],
-
-//     createdBy: {
+//     hostUser: {
 //       type: mongoose.Schema.Types.ObjectId,
 //       ref: "User",
 //       required: true,
 //     },
 
+//     participantUser: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "User",
+//       required: true,
+//     },
+
+//     skill: {
+//       type: String,
+//       default: "",
+//     },
+
+//     sessionType: {
+//       type: String,
+//       enum: ["instant", "scheduled"],
+//       // default: "scheduled",
+//     },
+
 //     status: {
 //       type: String,
-//       enum: ["pending", "confirmed", "completed", "rejected"],
+//       enum: [
+//         "pending",
+//         "accepted",
+//         "upcoming",
+//         "ongoing",
+//         "completed",
+//         "cancelled",
+//         "missed",
+//       ],
 //       default: "pending",
 //     },
 
-//     type: {
+//     startTime: Date,
+
+//     endTime: Date,
+
+//     meetingProvider: {
 //       type: String,
-//       enum: ["instant", "scheduled"],
-//       default: "scheduled",
+//       enum: ["jitsi", "agora"],
+//       default: "jitsi",
 //     },
 
-//     scheduledDate: Date,
-//     startTime: String,
+//     meetingRoomId: String,
 
-//     meetingLink: String,
+//     token: String,
+
+//     joinedAt: Date,
+
+//     endedAt: Date,
+
+//     duration: String,
 //   },
-//   { timestamps: true }
+//   {
+//     timestamps: true,
+//   }
 // );
 
-// module.exports = mongoose.model("Session", sessionSchema);
+// module.exports = mongoose.model(
+//   "Session",
+//   sessionSchema
+// );
 
 const mongoose = require("mongoose");
 
 const sessionSchema = new mongoose.Schema(
   {
-    users: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-    ],
-
-    createdBy: {
+    hostUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+
+    participantUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    skill: {
+      type: String,
+      default: "",
+    },
+
+    sessionType: {
+      type: String,
+      enum: ["instant", "scheduled"],
       required: true,
     },
 
@@ -60,32 +100,37 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       enum: [
         "pending",
-        "confirmed",
+        "upcoming",
+        "ongoing",
         "completed",
+        "cancelled",
         "rejected",
       ],
       default: "pending",
     },
 
-    type: {
+    startTime: Date,
+    endTime: Date,
+
+    meetingProvider: {
       type: String,
-      enum: ["instant", "scheduled"],
-      default: "scheduled",
+      default: "agora",
     },
 
-    scheduledDate: Date,
-
-    startTime: String,
-
-    meetingLink: String,
+    meetingRoomId: String,
+    token: String,
 
     joinedAt: Date,
-
     endedAt: Date,
 
-    duration: String,
+    duration: {
+      type: String,
+      default: "",
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 module.exports = mongoose.model("Session", sessionSchema);

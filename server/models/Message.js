@@ -1,24 +1,25 @@
 const mongoose = require("mongoose");
 
-const requestSchema = new mongoose.Schema(
+const messageSchema = new mongoose.Schema(
   {
     sender: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+
     receiver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    status: {
+
+    text: {
       type: String,
-      enum: ["pending", "accepted", "skipped", "ignored"],
-      default: "pending",
+      required: true,
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Request", requestSchema);
+module.exports = mongoose.model("Message", messageSchema);
