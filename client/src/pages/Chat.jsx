@@ -23,17 +23,19 @@ export default function Chat() {
 
   const { id } = useParams();
 
-  // logged in user
+  // LOGGED IN USER
   const currentUser = localStorage.getItem("userId");
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   const bottomRef = useRef(null);
 
 
   // ================= LOAD OLD MESSAGES =================
   useEffect(() => {
+
     fetchMessages();
 
     // JOIN SOCKET
@@ -44,29 +46,47 @@ export default function Chat() {
 
   // ================= AUTO SCROLL =================
   useEffect(() => {
+
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
     });
+
   }, [messages]);
 
 
-  // ================= RECEIVE REALTIME MESSAGE =================
+  // ================= SOCKET LISTENERS =================
   useEffect(() => {
 
+    // RECEIVE MESSAGE
     socket.on("receiveMessage", (data) => {
 
-      setMessages((prev) => [...prev, data]);
+      setMessages((prev) => [
+        ...prev,
+        data,
+      ]);
 
     });
 
+
+    // GET ONLINE USERS
+    socket.on("getOnlineUsers", (users) => {
+
+      setOnlineUsers(users);
+
+    });
+
+
     return () => {
+
       socket.off("receiveMessage");
+      socket.off("getOnlineUsers");
+
     };
 
   }, []);
 
 
-  // ================= FETCH =================
+  // ================= FETCH MESSAGES =================
   const fetchMessages = async () => {
 
     try {
@@ -79,12 +99,14 @@ export default function Chat() {
       setMessages(res.data);
 
     } catch (err) {
+
       console.log(err);
+
     }
   };
 
 
-  // ================= SEND =================
+  // ================= SEND MESSAGE =================
   const handleSend = async () => {
 
     if (!message.trim()) return;
@@ -97,7 +119,7 @@ export default function Chat() {
         text: message,
       };
 
-      // SAVE IN DB
+      // SAVE TO DATABASE
       const res = await sendMessage(newMsg);
 
       // UPDATE MY UI
@@ -106,35 +128,68 @@ export default function Chat() {
         res.data,
       ]);
 
-      // REALTIME SEND
-      socket.emit("sendMessage", res.data);
+      // SEND REALTIME
+      socket.emit(
+        "sendMessage",
+        res.data
+      );
 
       setMessage("");
 
     } catch (err) {
+
       console.log(err);
+
     }
   };
 
 
   // ================= ENTER KEY =================
   const handleKeyPress = (e) => {
+
     if (e.key === "Enter") {
       handleSend();
     }
+
   };
 
 
+  // ================= ONLINE STATUS =================
+  const isOnline = onlineUsers.includes(id);
+
+
   return (
+
     <div className="flex justify-center items-center p-6">
 
       <div className="w-full max-w-3xl bg-white shadow-2xl rounded-2xl overflow-hidden">
 
+
         {/* HEADER */}
-        <div className="bg-indigo-600 text-white px-6 py-4">
-          <h2 className="text-xl font-bold">
-            Chat
-          </h2>
+        <div className="bg-indigo-600 text-white px-6 py-4 flex items-center justify-between">
+
+          <div>
+
+            <h2 className="text-xl font-bold">
+              Chat
+            </h2>
+
+            <p className="text-sm opacity-90">
+              {isOnline ? "Online" : "Offline"}
+            </p>
+
+          </div>
+
+
+          {/* ONLINE DOT */}
+          <div
+            className={`w-4 h-4 rounded-full ${
+              isOnline
+                ? "bg-green-400"
+                : "bg-gray-400"
+            }`}
+          ></div>
+
         </div>
 
 
@@ -166,6 +221,7 @@ export default function Chat() {
 
           ))}
 
+          {/* AUTO SCROLL */}
           <div ref={bottomRef}></div>
 
         </div>
@@ -184,6 +240,7 @@ export default function Chat() {
             onKeyDown={handleKeyPress}
             className="flex-1 border rounded-xl px-4 py-3 outline-none"
           />
+
 
           <button
             onClick={handleSend}

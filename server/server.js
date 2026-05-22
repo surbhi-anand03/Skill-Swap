@@ -1,3 +1,5 @@
+const dns = require("node:dns/promises");
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -43,7 +45,7 @@ app.get("/", (req, res) => {
 const server = http.createServer(app);
 
 
-// ================= SOCKET.IO =================
+// ================= SOCKET =================
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
@@ -52,26 +54,42 @@ const io = new Server(server, {
 });
 
 
-// STORE CONNECTED USERS
+// ================= USERS =================
 const users = {};
+let onlineUsers = [];
 
+
+// ================= CONNECTION =================
 io.on("connection", (socket) => {
 
   console.log("User connected:", socket.id);
 
-  // USER JOINS
+
+  // JOIN
   socket.on("join", (userId) => {
+
     users[userId] = socket.id;
 
-    console.log("Users:", users);
+    onlineUsers = onlineUsers.filter(
+      (id) => id !== userId
+    );
+
+    onlineUsers.push(userId);
+
+    io.emit("getOnlineUsers", onlineUsers);
+
+    console.log("Online Users:", onlineUsers);
   });
+
 
   // SEND MESSAGE
   socket.on("sendMessage", (data) => {
 
-    const receiverSocketId = users[data.receiver];
+    const receiverSocketId =
+      users[data.receiver];
 
     if (receiverSocketId) {
+
       io.to(receiverSocketId).emit(
         "receiveMessage",
         data
@@ -79,14 +97,35 @@ io.on("connection", (socket) => {
     }
   });
 
+
   // DISCONNECT
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+
+    console.log("Disconnected:", socket.id);
+
+    for (const userId in users) {
+
+      if (users[userId] === socket.id) {
+
+        delete users[userId];
+
+        onlineUsers = onlineUsers.filter(
+          (id) => id !== userId
+        );
+
+        break;
+      }
+    }
+
+    io.emit("getOnlineUsers", onlineUsers);
+
+    console.log("Online Users:", onlineUsers);
   });
+
 });
 
 
-// ================= START SERVER =================
+// ================= START =================
 server.listen(5000, () => {
   console.log("Server running on port 5000");
 });
