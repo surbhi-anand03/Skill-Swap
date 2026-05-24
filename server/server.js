@@ -51,42 +51,117 @@ const io = new Server(server, {
   },
 });
 
+// ================= ONLINE USERS =================
+let onlineUsers = [];
 
-// STORE CONNECTED USERS
-const users = {};
+// ADD USER
+const addUser = (userId, socketId) => {
 
+  const exists = onlineUsers.find(
+    (user) => user.userId === userId
+  );
+
+  if (!exists) {
+
+    onlineUsers.push({
+      userId,
+      socketId,
+    });
+
+  }
+
+};
+
+// REMOVE USER
+const removeUser = (socketId) => {
+
+  onlineUsers = onlineUsers.filter(
+    (user) => user.socketId !== socketId
+  );
+
+};
+
+// GET USER
+const getUser = (userId) => {
+
+  return onlineUsers.find(
+    (user) => user.userId === userId
+  );
+
+};
+
+// ================= SOCKET CONNECTION =================
 io.on("connection", (socket) => {
 
-  console.log("User connected:", socket.id);
+  console.log(
+    "User connected:",
+    socket.id
+  );
 
-  // USER JOINS
+  // ================= JOIN =================
   socket.on("join", (userId) => {
-    users[userId] = socket.id;
 
-    console.log("Users:", users);
+    addUser(userId, socket.id);
+
+    console.log(
+      "Online Users:",
+      onlineUsers
+    );
+
+    // SEND ONLINE USERS TO EVERYONE
+    io.emit(
+      "getOnlineUsers",
+      onlineUsers
+    );
+
   });
 
-  // SEND MESSAGE
-  socket.on("sendMessage", (data) => {
+  // ================= SEND MESSAGE =================
+  socket.on(
+    "sendMessage",
+    (data) => {
 
-    const receiverSocketId = users[data.receiver];
-
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit(
-        "receiveMessage",
-        data
+      const user = getUser(
+        data.receiver
       );
+
+      if (user) {
+
+        io.to(user.socketId).emit(
+          "receiveMessage",
+          data
+        );
+
+      }
+
     }
-  });
+  );
 
-  // DISCONNECT
+  // ================= DISCONNECT =================
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-});
 
+    console.log(
+      "User disconnected:",
+      socket.id
+    );
+
+    removeUser(socket.id);
+
+    // UPDATE ONLINE USERS
+    io.emit(
+      "getOnlineUsers",
+      onlineUsers
+    );
+
+  });
+
+});
 
 // ================= START SERVER =================
 server.listen(5000, () => {
-  console.log("Server running on port 5000");
+
+  console.log(
+    "Server running on port 5000"
+  );
+
 });
