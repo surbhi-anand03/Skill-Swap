@@ -8,7 +8,7 @@ import {
 } from "../api/api";
 
 const UserCard = ({ user, refresh }) => {
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // 🔥 DETERMINE STATE
   const getState = () => {

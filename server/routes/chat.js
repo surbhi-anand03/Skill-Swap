@@ -2,12 +2,16 @@ const express = require("express");
 const router = express.Router();
 
 const Message = require("../models/Message");
+const auth = require("../middleware/authMiddleware");
 
 
 // SEND MESSAGE
-router.post("/send", async (req, res) => {
+router.post("/send", auth, async (req, res) => {
   try {
-    const { sender, receiver, text } = req.body;
+    // const { sender, receiver, text } = req.body;
+
+    const sender = req.user.id;
+    const { receiver, text } = req.body;
 
     const message = await Message.create({
       sender,
@@ -23,7 +27,8 @@ router.post("/send", async (req, res) => {
 
 
 // GET CHAT MESSAGES
-router.get("/:user1/:user2", async (req, res) => {
+
+router.get("/:user1/:user2", auth, async (req, res) => {
   try {
     const { user1, user2 } = req.params;
 
@@ -39,5 +44,37 @@ router.get("/:user1/:user2", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// router.get("/:userId", auth, async (req, res) => {
+
+//   try {
+
+//     const currentUser = req.user.id;
+
+//     const otherUser = req.params.userId;
+
+//     const messages = await Message.find({
+//       $or: [
+//         {
+//           sender: currentUser,
+//           receiver: otherUser,
+//         },
+//         {
+//           sender: otherUser,
+//           receiver: currentUser,
+//         },
+//       ],
+//     }).sort({ createdAt: 1 });
+
+//     res.json(messages);
+
+//   } catch (err) {
+
+//     res.status(500).json({
+//       error: err.message,
+//     });
+
+//   }
+// });
 
 module.exports = router;
