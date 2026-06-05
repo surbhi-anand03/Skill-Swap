@@ -7,6 +7,16 @@ import {
   rejectSession
 } from "../api/api";
 
+import {
+  Calendar,
+  CheckCircle,
+  Clock3,
+  Video,
+  Zap,
+  X,
+  Check
+} from "lucide-react";
+
 export default function Sessions() {
   const navigate = useNavigate();
 
@@ -78,169 +88,361 @@ export default function Sessions() {
     navigate(`/video/${id}`);
   };
 
-  return (
-    <div className="p-6">
+  /* ================= AVATAR ================= */
 
-      <h2 className="text-3xl font-bold text-center mb-8">
-        Sessions
-      </h2>
+  const getAvatar = (host, participant) => {
+    const first =
+      host?.name?.charAt(0) || "";
+
+    const second =
+      participant?.name?.charAt(0) || "";
+
+    return `${first}${second}`.toUpperCase();
+  };
+
+  return (
+    <div className="bg-[#f8fafc] min-h-screen p-8">
+
+      {/* HEADER */}
+      <div className="mb-10">
+        <h1 className="text-5xl font-bold text-slate-900">
+          Sessions
+        </h1>
+
+        <p className="text-slate-500 mt-2 text-lg">
+          Manage your teaching and
+          learning sessions
+        </p>
+      </div>
 
       {/* ================= PENDING ================= */}
 
-      <h3 className="text-xl font-semibold mb-4">
-        Pending
-      </h3>
+      <section className="mb-10">
+        <div className="flex items-center gap-3 mb-4">
+          <Clock3
+            className="text-yellow-500"
+            size={24}
+          />
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">
+              Pending
+            </h2>
 
-      {data.pending.map((s) => {
-        const isCreator =
-          s.hostUser?._id === userId;
-
-        return (
-          <div
-            key={s._id}
-            className="bg-white shadow p-4 rounded mb-4"
-          >
-            <p className="font-semibold">
-              {s.hostUser?.name}
-              {" & "}
-              {s.participantUser?.name}
+            <p className="text-slate-500">
+              You have{" "}
+              {data.pending.length}{" "}
+              pending request
+              {data.pending.length !== 1
+                ? "s"
+                : ""}
             </p>
-
-            <p className="text-sm text-gray-500">
-              {s.sessionType}
-            </p>
-
-            {s.startTime && (
-              <p className="text-sm text-gray-500">
-                {new Date(
-                  s.startTime
-                ).toLocaleString()}
-              </p>
-            )}
-
-            <div className="mt-3">
-              {isCreator ? (
-                <button
-                  className="bg-yellow-500 text-white px-4 py-2 rounded"
-                >
-                  Waiting...
-                </button>
-              ) : (
-                <div className="flex gap-3">
-                  <button
-                    onClick={() =>
-                      handleAccept(
-                        s._id
-                      )
-                    }
-                    className="bg-green-600 text-white px-4 py-2 rounded"
-                  >
-                    Accept
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handleReject(
-                        s._id
-                      )
-                    }
-                    className="bg-red-600 text-white px-4 py-2 rounded"
-                  >
-                    Reject
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
-        );
-      })}
+        </div>
+
+        <div className="space-y-4">
+          {data.pending.length ===
+          0 ? (
+            <div className="border bg-white p-10 text-center">
+              <Clock3
+                className="mx-auto text-slate-300 mb-3"
+                size={40}
+              />
+              <p className="text-slate-500">
+                No pending sessions
+              </p>
+            </div>
+          ) : (
+            data.pending.map((s) => {
+              const isCreator =
+                s.hostUser?._id ===
+                userId;
+
+              return (
+                <div
+                  key={s._id}
+                  className="bg-white border border-slate-200 border-l-4 border-l-yellow-500 p-6 shadow-sm"
+                >
+                  <div className="flex justify-between items-center">
+
+                    {/* LEFT */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {getAvatar(
+                          s.hostUser,
+                          s.participantUser
+                        )}
+                      </div>
+
+                      <div>
+                        <h3 className="font-bold text-xl text-slate-900">
+                          {
+                            s.hostUser
+                              ?.name
+                          }{" "}
+                          &{" "}
+                          {
+                            s
+                              .participantUser
+                              ?.name
+                          }
+                        </h3>
+
+                        <div className="flex items-center gap-2 text-slate-500 mt-1">
+                          <Zap
+                            size={14}
+                          />
+                          <span>
+                            {s.sessionType ===
+                            "instant"
+                              ? "Instant Session"
+                              : "Scheduled Session"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* RIGHT */}
+                    <div className="flex items-center gap-3">
+
+                      {isCreator ? (
+                        <button className="bg-yellow-100 text-yellow-700 px-5 py-2 font-medium">
+                          Waiting for
+                          response
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleAccept(
+                                s._id
+                              )
+                            }
+                            className="bg-green-100 text-green-700 px-5 py-2 flex items-center gap-2 font-medium"
+                          >
+                            <Check
+                              size={18}
+                            />
+                            Accept
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              handleReject(
+                                s._id
+                              )
+                            }
+                            className="bg-red-100 text-red-600 px-5 py-2 flex items-center gap-2 font-medium"
+                          >
+                            <X
+                              size={18}
+                            />
+                            Reject
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
 
       {/* ================= UPCOMING ================= */}
 
-      <h3 className="text-xl font-semibold mt-8 mb-4">
-        Upcoming
-      </h3>
+      <section className="mb-10">
+        <div className="flex items-center gap-3 mb-4">
+          <Calendar
+            className="text-blue-600"
+            size={24}
+          />
 
-      {data.upcoming.map((s) => (
-        <div
-          key={s._id}
-          className="bg-white shadow p-4 rounded mb-4"
-        >
-          <p className="font-semibold">
-            {s.hostUser?.name}
-            {" & "}
-            {s.participantUser?.name}
-          </p>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">
+              Upcoming
+            </h2>
 
-          <p className="text-sm text-gray-500">
-            {s.sessionType}
-          </p>
-
-          {s.startTime && (
-            <p className="text-sm text-gray-500">
-              {new Date(
-                s.startTime
-              ).toLocaleString()}
+            <p className="text-slate-500">
+              You have{" "}
+              {
+                data.upcoming.length
+              }{" "}
+              upcoming session
+              {data.upcoming.length !==
+              1
+                ? "s"
+                : ""}
             </p>
-          )}
-
-          <div className="mt-3">
-            <button
-              disabled={!canJoin(s)}
-              onClick={() =>
-                handleJoin(s._id)
-              }
-              className={`px-4 py-2 rounded text-white ${
-                canJoin(s)
-                  ? "bg-blue-600"
-                  : "bg-gray-400 cursor-not-allowed"
-              }`}
-            >
-              {canJoin(s)
-                ? "Join"
-                : "Available 10 mins before"}
-            </button>
           </div>
         </div>
-      ))}
+
+        <div className="space-y-4">
+          {data.upcoming.length ===
+          0 ? (
+            <div className="border border-dashed border-blue-300 bg-blue-50 p-14 text-center">
+              <Calendar
+                className="mx-auto text-blue-500 mb-4"
+                size={40}
+              />
+
+              <h3 className="font-semibold text-xl">
+                No upcoming
+                sessions
+              </h3>
+
+              <p className="text-slate-500 mt-2">
+                Your scheduled
+                sessions will appear
+                here.
+              </p>
+            </div>
+          ) : (
+            data.upcoming.map(
+              (s) => (
+                <div
+                  key={s._id}
+                  className="bg-white border border-slate-200 border-l-4 border-l-blue-600 p-6 shadow-sm"
+                >
+                  <div className="flex justify-between items-center">
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {getAvatar(
+                          s.hostUser,
+                          s.participantUser
+                        )}
+                      </div>
+
+                      <div>
+                        <h3 className="font-bold text-xl">
+                          {
+                            s.hostUser
+                              ?.name
+                          }{" "}
+                          &{" "}
+                          {
+                            s
+                              .participantUser
+                              ?.name
+                          }
+                        </h3>
+
+                        <p className="text-slate-500">
+                          {new Date(
+                            s.startTime
+                          ).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      disabled={
+                        !canJoin(
+                          s
+                        )
+                      }
+                      onClick={() =>
+                        handleJoin(
+                          s._id
+                        )
+                      }
+                      className={`px-6 py-3 text-white flex items-center gap-2 font-medium ${
+                        canJoin(s)
+                          ? "bg-blue-600"
+                          : "bg-slate-400 cursor-not-allowed"
+                      }`}
+                    >
+                      <Video
+                        size={18}
+                      />
+                      {canJoin(s)
+                        ? "Join"
+                        : "Available 10 mins before"}
+                    </button>
+                  </div>
+                </div>
+              )
+            )
+          )}
+        </div>
+      </section>
 
       {/* ================= COMPLETED ================= */}
 
-      <h3 className="text-xl font-semibold mt-8 mb-4">
-        Completed
-      </h3>
+      <section>
+        <div className="flex items-center gap-3 mb-4">
+          <CheckCircle
+            className="text-green-600"
+            size={24}
+          />
 
-      {data.completed.map((s) => (
-        <div
-          key={s._id}
-          className="bg-gray-100 shadow p-4 rounded mb-4"
-        >
-          <p className="font-semibold">
-            {s.hostUser?.name}
-            {" & "}
-            {s.participantUser?.name}
-          </p>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">
+              Completed
+            </h2>
 
-          <p className="text-sm">
-            Type: {s.sessionType}
-          </p>
-
-          <p className="text-sm">
-            Duration:
-            {" "}
-            {s.duration ||
-              "0 mins"}
-          </p>
-
-          <p className="text-sm">
-            Completed:
-            {" "}
-            {new Date(
-              s.updatedAt
-            ).toLocaleString()}
-          </p>
+            <p className="text-slate-500">
+              You have{" "}
+              {
+                data.completed.length
+              }{" "}
+              completed sessions
+            </p>
+          </div>
         </div>
-      ))}
+
+        <div className="space-y-4">
+          {data.completed.map(
+            (s) => (
+              <div
+                key={s._id}
+                className="bg-white border border-slate-200 border-l-4 border-l-green-500 p-6 shadow-sm"
+              >
+                <div className="flex justify-between items-center">
+
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      {getAvatar(
+                        s.hostUser,
+                        s.participantUser
+                      )}
+                    </div>
+
+                    <div>
+                      <h3 className="font-bold text-xl">
+                        {
+                          s.hostUser
+                            ?.name
+                        }{" "}
+                        &{" "}
+                        {
+                          s
+                            .participantUser
+                            ?.name
+                        }
+                      </h3>
+
+                      <p className="text-slate-500 text-sm mt-1">
+                        Duration:{" "}
+                        {s.duration ||
+                          "0 mins"}
+                        {" • "}
+                        Completed:{" "}
+                        {new Date(
+                          s.updatedAt
+                        ).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <CheckCircle className="text-green-500" />
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      </section>
     </div>
   );
 }

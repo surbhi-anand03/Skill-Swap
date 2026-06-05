@@ -2,11 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProfile } from "../api/api";
 import API from "../api/api";
-import { FaEdit, FaUserCircle } from "react-icons/fa";
+import {
+  FaCamera,
+  FaUserCircle,
+  FaSave,
+} from "react-icons/fa";
+import { HiOutlineSparkles } from "react-icons/hi";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const [editMode, setEditMode] = useState(false);
+  
 
   const [form, setForm] = useState({
     name: "",
@@ -15,20 +20,30 @@ export default function Profile() {
     bio: "",
   });
 
+  const [editMode, setEditMode] =
+    useState(false);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const res = await getProfile();
+
         const user = res.data;
 
         setForm({
           name: user.name || "",
-          skillsOffered: user.skillsOffered?.join(", ") || "",
-          skillsWanted: user.skillsWanted?.join(", ") || "",
+          skillsOffered:
+            user.skillsOffered?.join(", ") ||
+            "",
+          skillsWanted:
+            user.skillsWanted?.join(", ") ||
+            "",
           bio: user.bio || "",
         });
       } catch (err) {
-        if (err.response?.status === 401) navigate("/");
+        if (err.response?.status === 401) {
+          navigate("/");
+        }
       }
     };
 
@@ -36,7 +51,11 @@ export default function Profile() {
   }, [navigate]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]:
+        e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -45,151 +64,433 @@ export default function Profile() {
     try {
       await API.put("/user/profile", {
         ...form,
-        skillsOffered: form.skillsOffered.split(",").map(s => s.trim()),
-        skillsWanted: form.skillsWanted.split(",").map(s => s.trim()),
+        skillsOffered:
+          form.skillsOffered
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+
+        skillsWanted:
+          form.skillsWanted
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
       });
 
       setEditMode(false);
+      alert("Profile updated ✅");
     } catch (err) {
       console.log(err);
     }
   };
 
+  const offeredSkills =
+    form.skillsOffered
+      .split(",")
+      .filter(Boolean);
+
+  const wantedSkills =
+    form.skillsWanted
+      .split(",")
+      .filter(Boolean);
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 py-10 px-4">
 
-      {/* 🔙 Top Bar */}
-      <div className="flex items-center gap-2 px-6 py-4">
-      </div>
+      <div className="max-w-4xl mx-auto">
 
-      {/* 📦 Profile Card */}
-      <div className="flex justify-center">
-        <div className="bg-white shadow-lg rounded-2xl w-[420px] p-6">
+        {/* Main Card */}
+        {/* <div className="bg-white rounded-3xl shadow-xl overflow-hidden"> */}
 
-          {/* 👤 Avatar */}
-          <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-              {form.name ? (
-                <span className="text-3xl font-bold text-indigo-600">
-                  {form.name[0].toUpperCase()}
-                </span>
-              ) : (
-                <FaUserCircle className="text-gray-400 text-6xl" />
+        <div
+          className="
+            bg-white
+            rounded-[32px]
+            shadow-[0_20px_60px_rgba(0,0,0,0.08)]
+            border
+            border-gray-100
+            overflow-hidden
+          "
+        >
+
+          {/* Header */}
+          {/* <div className="h-40 bg-gradient-to-r from-violet-600 via-purple-600 to-violet-700" /> */}
+
+          {/* Profile Section */}
+          <div className="px-8 pt-8 pb-8">
+
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+
+              <div className="relative">
+
+                {/* <div className="w-32 h-32 rounded-full bg-violet-100 border-4 border-white shadow-lg flex items-center justify-center"> */}
+
+                <div
+                  className="
+                    w-32 h-32 rounded-full
+                    bg-gradient-to-br
+                    from-violet-100
+                    to-purple-100
+                    shadow-[0_10px_30px_rgba(124,58,237,0.2)]
+                    flex items-center justify-center
+                  "
+                >
+
+                  {form.name ? (
+                    <span className="text-5xl font-bold text-violet-700">
+                      {form.name[0].toUpperCase()}
+                    </span>
+                  ) : (
+                    <FaUserCircle className="text-7xl text-violet-400" />
+                  )}
+
+                </div>
+
+                <button
+                  className="
+                    absolute
+                    bottom-1
+                    right-1
+                    w-10
+                    h-10
+                    rounded-full
+                    bg-violet-100
+                    shadow-md
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+                  <FaCamera className="text-violet-600" />
+                </button>
+
+              </div>
+
+              <div className="flex-1">
+
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {form.name ||
+                    "SkillSwap User"}
+                </h1>
+
+                <p className="text-gray-500 mt-1">
+                  Share skills. Grow together.
+                </p>
+
+              </div>
+
+              {!editMode && (
+                <button
+                  onClick={() =>
+                    setEditMode(true)
+                  }
+                  className="
+                    bg-violet-600
+                    hover:bg-violet-700
+                    text-white
+                    px-6
+                    py-3
+                    rounded-xl
+                    font-medium
+                  "
+                >
+                  Edit Profile
+                </button>
               )}
+
             </div>
 
-            <h2 className="text-xl font-bold mt-3">
-              {form.name || "Anonymous"}
-            </h2>
+            {/* Form Card */}
+            {/* <div className="mt-10 border rounded-3xl p-8"> */}
+              <div
+                className="
+                  mt-8
+                  bg-gradient-to-br
+                  from-white
+                  to-gray-50
+                  rounded-[28px]
+                  border
+                  border-gray-100
+                  shadow-sm
+                  p-8
+                "
+              >
+              <div className="flex items-center gap-3 mb-8">
+
+                <div className="w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center">
+
+                  <HiOutlineSparkles className="text-violet-600 text-xl" />
+
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-semibold">
+                    Profile Information
+                  </h2>
+
+                  <p className="text-gray-500 text-sm">
+                    Tell the community about
+                    yourself
+                  </p>
+                </div>
+
+              </div>
+
+              {editMode ? (
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-6"
+                >
+
+                  <div>
+                    <label className="block font-medium mb-2">
+                      Full Name
+                    </label>
+
+                    <input
+                      name="name"
+                      value={form.name}
+                      onChange={
+                        handleChange
+                      }
+                      className="
+                        w-full
+                        border
+                        rounded-2xl
+                        px-4
+                        py-4
+                        outline-none
+                        focus:ring-2
+                        focus:ring-violet-500
+                      "
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-medium mb-2">
+                      Skills Offered
+                    </label>
+
+                    <input
+                      name="skillsOffered"
+                      value={
+                        form.skillsOffered
+                      }
+                      onChange={
+                        handleChange
+                      }
+                      placeholder="React, Node, Python"
+                      className="
+                        w-full
+                        border
+                        rounded-2xl
+                        px-4
+                        py-4
+                        outline-none
+                        focus:ring-2
+                        focus:ring-violet-500
+                      "
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-medium mb-2">
+                      Skills Wanted
+                    </label>
+
+                    <input
+                      name="skillsWanted"
+                      value={
+                        form.skillsWanted
+                      }
+                      onChange={
+                        handleChange
+                      }
+                      placeholder="AWS, UI/UX"
+                      className="
+                        w-full
+                        border
+                        rounded-2xl
+                        px-4
+                        py-4
+                        outline-none
+                        focus:ring-2
+                        focus:ring-violet-500
+                      "
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-medium mb-2">
+                      Bio
+                    </label>
+
+                    <textarea
+                      rows="5"
+                      maxLength="200"
+                      name="bio"
+                      value={form.bio}
+                      onChange={
+                        handleChange
+                      }
+                      className="
+                        w-full
+                        border
+                        rounded-2xl
+                        px-4
+                        py-4
+                        outline-none
+                        resize-none
+                        focus:ring-2
+                        focus:ring-violet-500
+                      "
+                    />
+
+                    <div className="text-right text-gray-400 text-sm mt-2">
+                      {form.bio.length}/200
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+
+                    <button
+                      type="submit"
+                      className="
+                        flex-1
+                        bg-violet-600
+                        hover:bg-violet-700
+                        text-white
+                        py-3
+                        rounded-xl
+                        flex
+                        items-center
+                        justify-center
+                        gap-2
+                      "
+                    >
+                      <FaSave />
+                      Save Changes
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditMode(false)
+                      }
+                      className="
+                        flex-1
+                        bg-gray-100
+                        hover:bg-gray-200
+                        py-3
+                        rounded-xl
+                      "
+                    >
+                      Cancel
+                    </button>
+
+                  </div>
+
+                </form>
+              ) : (
+                <div className="space-y-8">
+
+                  <div>
+                    <h3 className="font-medium mb-3 text-green-800">
+                      Skills Offered
+                    </h3>
+
+                    <div className="flex flex-wrap gap-2">
+                      {offeredSkills.map(
+                        (
+                          skill,
+                          index
+                        ) => (
+                          <span
+                            key={index}
+                            className="
+                              px-4 py-2 rounded-full
+                            bg-green-200
+                            border border-green-400
+                            text-green-900
+                            font-medium
+                            text-sm
+                            shadow-sm
+                            hover:shadow-md
+                            transition
+                            "
+                          >
+                            {skill.trim()}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-medium mb-3 text-blue-700">
+                      Skills Wanted
+                    </h3>
+
+                    <div className="flex flex-wrap gap-2">
+                      {wantedSkills.map(
+                        (
+                          skill,
+                          index
+                        ) => (
+                          <span
+                            key={index}
+                            className="
+                                px-4 py-2 rounded-full
+                            bg-blue-200
+                            border border-blue-400
+                            text-blue-900
+                            font-medium
+                            text-sm
+                            shadow-sm
+                            hover:shadow-md
+                            transition"
+                          >
+                            {skill.trim()}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-medium mb-3 text-violet-800">
+                      Bio
+                    </h3>
+
+                    {/* <div className="bg-gray-50 border rounded-2xl p-5"> */}
+                      <div
+                        className="
+                          bg-white
+                          border
+                          border-gray-200
+                          rounded-3xl
+                          p-6
+                          shadow-sm
+                        "
+                      >
+                      <p className="text-gray-700">
+                        {form.bio ||
+                          "No bio added yet."}
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+            </div>
+
           </div>
 
-          {/* 👀 VIEW MODE */}
-          {!editMode ? (
-            <div className="mt-6 space-y-4">
-
-              {/* Skills Offered */}
-              <div>
-                <p className="text-sm font-semibold text-gray-600">
-                  Skills Offered
-                </p>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {form.skillsOffered.split(",").map((s, i) => (
-                    <span
-                      key={i}
-                      className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Skills Wanted */}
-              <div>
-                <p className="text-sm font-semibold text-gray-600">
-                  Skills Wanted
-                </p>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {form.skillsWanted.split(",").map((s, i) => (
-                    <span
-                      key={i}
-                      className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bio */}
-              <div>
-                <p className="text-sm font-semibold text-gray-600">Bio</p>
-                <p className="text-gray-700 text-sm mt-1">
-                  {form.bio || "No bio available"}
-                </p>
-              </div>
-
-              {/* Edit Button */}
-              <button
-                onClick={() => setEditMode(true)}
-                className="w-full mt-4 flex items-center justify-center gap-2 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
-              >
-                <FaEdit />
-                Edit Profile
-              </button>
-            </div>
-          ) : (
-            // ✏️ EDIT MODE
-            <form onSubmit={handleSubmit} className="mt-6 space-y-3">
-
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Name"
-                className="w-full p-2 border rounded-lg"
-              />
-
-              <input
-                name="skillsOffered"
-                value={form.skillsOffered}
-                onChange={handleChange}
-                placeholder="Skills Offered"
-                className="w-full p-2 border rounded-lg"
-              />
-
-              <input
-                name="skillsWanted"
-                value={form.skillsWanted}
-                onChange={handleChange}
-                placeholder="Skills Wanted"
-                className="w-full p-2 border rounded-lg"
-              />
-
-              <textarea
-                name="bio"
-                value={form.bio}
-                onChange={handleChange}
-                placeholder="Bio"
-                className="w-full p-2 border rounded-lg"
-              />
-
-              <button className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
-                Save
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setEditMode(false)}
-                className="w-full bg-gray-200 py-2 rounded-lg"
-              >
-                Cancel
-              </button>
-            </form>
-          )}
-
         </div>
+
       </div>
+
     </div>
   );
 }

@@ -6,11 +6,12 @@ const Request = require("../models/Request");
 const {
   getAllUsers,
   likeUser,
-  skipUser
+  skipUser,
+  updateProfile
 } = require("../controllers/userController");
 
 // GET all users
-router.get("/all", getAllUsers);
+router.get("/all",  auth, getAllUsers);
 
 
 // GET profile
@@ -19,21 +20,9 @@ router.get("/profile", auth, async (req, res) => {
   res.json(user);
 });
 
-// UPDATE profile
-router.put("/profile", auth, async (req, res) => {
-  const { name, skillsOffered, skillsWanted, bio } = req.body;
+// UPDATE Profile
 
-  const user = await User.findById(req.user.id);
-
-  user.name = name;
-  user.skillsOffered = skillsOffered;
-  user.skillsWanted = skillsWanted;
-  user.bio = bio;
-
-  await user.save();
-
-  res.json(user);
-});
+router.put("/profile", auth, updateProfile);
 
 const mongoose = require("mongoose"); // ← add at top of file if not there
 

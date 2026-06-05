@@ -1,23 +1,314 @@
+// const Request = require("../models/Request");
+// const User = require("../models/User");
+// const Match = require("../models/Match");
+
+
+// // ================= SEND REQUEST =================
+
+// exports.sendRequest = async (req, res) => {
+//   try {
+
+//     const { receiverId } = req.body;
+
+//     const senderId = req.user.id;
+
+//     if (senderId === receiverId) {
+//       return res
+//         .status(400)
+//         .json({
+//           msg: "Cannot send to yourself",
+//         });
+//     }
+
+//     // CHECK BOTH DIRECTIONS
+//     const existing = await Request.findOne({
+//       $or: [
+//         {
+//           sender: senderId,
+//           receiver: receiverId,
+//         },
+//         {
+//           sender: receiverId,
+//           receiver: senderId,
+//         },
+//       ],
+//     });
+
+//     if (existing) {
+
+//       if (existing.status === "pending") {
+//         return res
+//           .status(400)
+//           .json({
+//             msg: "Request already sent",
+//           });
+//       }
+
+//       if (existing.status === "accepted") {
+//         return res
+//           .status(400)
+//           .json({
+//             msg: "Already matched",
+//           });
+//       }
+
+//       // ignored/skipped → allow new request
+//     }
+
+//     // CREATE NEW REQUEST
+//     const request = await Request.create({
+//       sender: senderId,
+//       receiver: receiverId,
+//       status: "pending",
+//     });
+
+//     res.json({
+//       msg: "Request sent",
+//       request,
+//     });
+
+//   } catch (err) {
+
+//     res.status(500).json({
+//       error: err.message,
+//     });
+//   }
+// };
+
+
+// // ================= GET INCOMING =================
+
+// exports.getIncoming = async (req, res) => {
+//   try {
+
+//     const requests = await Request.find({
+//       receiver: req.user.id,
+//       status: "pending",
+//     }).populate("sender", "name");
+
+//     res.json(requests);
+
+//   } catch (err) {
+
+//     res.status(500).json({
+//       error: err.message,
+//     });
+//   }
+// };
+
+
+// // ================= GET SKIPPED =================
+
+// exports.getSkipped = async (req, res) => {
+//   try {
+
+//     const userId = req.user.id;
+
+//     const requests = await Request.find({
+//       status: "skipped",
+
+//       $or: [
+//         { sender: userId },
+//         { receiver: userId },
+//       ],
+//     })
+//       .populate("sender", "name")
+//       .populate("receiver", "name");
+
+//     res.json(requests);
+
+//   } catch (err) {
+
+//     res.status(500).json({
+//       error: err.message,
+//     });
+//   }
+// };
+
+
+// // ================= GET PENDING =================
+
+// exports.getPending = async (req, res) => {
+//   try {
+
+//     const requests = await Request.find({
+//       sender: req.user.id,
+//       status: "pending",
+//     }).populate("receiver", "name");
+
+//     res.json(requests);
+
+//   } catch (err) {
+
+//     res.status(500).json({
+//       error: err.message,
+//     });
+//   }
+// };
+
+
+// // ================= RESPOND REQUEST =================
+
+// exports.respondRequest = async (req, res) => {
+
+//   try {
+
+//     const { requestId, action } = req.body;
+
+//     const userId = req.user.id;
+
+//     const request = await Request.findById(requestId);
+
+//     if (!request) {
+//       return res
+//         .status(404)
+//         .json({
+//           msg: "Request not found",
+//         });
+//     }
+
+//     // BOTH USERS MUST BE INVOLVED
+//     const isInvolved =
+//       request.receiver.toString() === userId ||
+//       request.sender.toString() === userId;
+
+//     if (!isInvolved) {
+
+//       return res
+//         .status(403)
+//         .json({
+//           msg: "Not authorized",
+//         });
+//     }
+
+//     // ================= ACCEPT =================
+
+//     if (action === "accepted") {
+
+//       request.status = "accepted";
+
+//       await request.save();
+
+//       // CHECK IF MATCH ALREADY EXISTS
+//       const existingMatch = await Match.findOne({
+//         users: {
+//           $all: [
+//             request.sender,
+//             request.receiver,
+//           ],
+//         },
+//       });
+
+//       // CREATE MATCH IF NOT EXISTS
+//       if (!existingMatch) {
+
+//         await Match.create({
+//           users: [
+//             request.sender,
+//             request.receiver,
+//           ],
+//         });
+//       }
+
+//       // CLEAN DUPLICATE REQUESTS
+//       await Request.deleteMany({
+//         $or: [
+//           {
+//             sender: request.sender,
+//             receiver: request.receiver,
+//           },
+//           {
+//             sender: request.receiver,
+//             receiver: request.sender,
+//           },
+//         ],
+
+//         _id: {
+//           $ne: request._id,
+//         },
+//       });
+
+//     }
+
+//     // ================= IGNORE =================
+
+//     else if (action === "ignored") {
+
+//       request.status = "ignored";
+
+//       await request.save();
+//     }
+
+//     // ================= SKIP =================
+
+//     else if (action === "skipped") {
+
+//       request.status = "skipped";
+
+//       await request.save();
+//     }
+
+//     // ================= INVALID =================
+
+//     else {
+
+//       return res
+//         .status(400)
+//         .json({
+//           msg: "Invalid action",
+//         });
+//     }
+
+//     res.json({
+//       msg: `Request ${action}`,
+//       request,
+//     });
+
+//   } catch (err) {
+
+//     console.error("RESPOND ERROR:", err);
+
+//     res.status(500).json({
+//       error: err.message,
+//     });
+//   }
+// };
+
+
+// // ================= GET ALL USERS =================
+
+// exports.getAllUsers = async (req, res) => {
+
+//   try {
+
+//     const users = await User.find()
+//       .select("-password");
+
+//     res.json(users);
+
+//   } catch (err) {
+
+//     res.status(500).json({
+//       error: err.message,
+//     });
+//   }
+// };
+
 const Request = require("../models/Request");
 const User = require("../models/User");
 const Match = require("../models/Match");
-
 
 // ================= SEND REQUEST =================
 
 exports.sendRequest = async (req, res) => {
   try {
-
     const { receiverId } = req.body;
-
     const senderId = req.user.id;
 
     if (senderId === receiverId) {
-      return res
-        .status(400)
-        .json({
-          msg: "Cannot send to yourself",
-        });
+      return res.status(400).json({
+        msg: "Cannot send request to yourself",
+      });
     }
 
     // CHECK BOTH DIRECTIONS
@@ -35,27 +326,21 @@ exports.sendRequest = async (req, res) => {
     });
 
     if (existing) {
-
       if (existing.status === "pending") {
-        return res
-          .status(400)
-          .json({
-            msg: "Request already sent",
-          });
+        return res.status(400).json({
+          msg: "Request already exists",
+        });
       }
 
       if (existing.status === "accepted") {
-        return res
-          .status(400)
-          .json({
-            msg: "Already matched",
-          });
+        return res.status(400).json({
+          msg: "Already matched",
+        });
       }
 
-      // ignored/skipped → allow new request
+      // ignored / skipped → allow resend
     }
 
-    // CREATE NEW REQUEST
     const request = await Request.create({
       sender: senderId,
       receiver: receiverId,
@@ -63,32 +348,39 @@ exports.sendRequest = async (req, res) => {
     });
 
     res.json({
-      msg: "Request sent",
+      msg: "Request sent successfully",
       request,
     });
-
   } catch (err) {
+    console.error("SEND REQUEST ERROR:", err);
 
     res.status(500).json({
       error: err.message,
     });
   }
 };
-
 
 // ================= GET INCOMING =================
 
 exports.getIncoming = async (req, res) => {
   try {
-
     const requests = await Request.find({
       receiver: req.user.id,
       status: "pending",
-    }).populate("sender", "name");
+    }).populate(
+      "sender",
+      `
+      name
+      skills
+      skillsOffered
+      skillsWanted
+      bio
+      `
+    );
 
     res.json(requests);
-
   } catch (err) {
+    console.error("GET INCOMING ERROR:", err);
 
     res.status(500).json({
       error: err.message,
@@ -96,112 +388,131 @@ exports.getIncoming = async (req, res) => {
   }
 };
 
+// ================= GET PENDING (SENT) =================
+
+exports.getPending = async (req, res) => {
+  try {
+    const requests = await Request.find({
+      sender: req.user.id,
+      status: "pending",
+    }).populate(
+      "receiver",
+      `
+      name
+      skills
+      skillsOffered
+      skillsWanted
+      bio
+      `
+    );
+
+    res.json(requests);
+  } catch (err) {
+    console.error("GET PENDING ERROR:", err);
+
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
 
 // ================= GET SKIPPED =================
 
 exports.getSkipped = async (req, res) => {
   try {
-
     const userId = req.user.id;
 
     const requests = await Request.find({
       status: "skipped",
-
       $or: [
         { sender: userId },
         { receiver: userId },
       ],
     })
-      .populate("sender", "name")
-      .populate("receiver", "name");
+      .populate(
+        "sender",
+        `
+        name
+        skills
+        skillsOffered
+        skillsWanted
+        `
+      )
+      .populate(
+        "receiver",
+        `
+        name
+        skills
+        skillsOffered
+        skillsWanted
+        `
+      );
 
     res.json(requests);
-
   } catch (err) {
+    console.error("GET SKIPPED ERROR:", err);
 
     res.status(500).json({
       error: err.message,
     });
   }
 };
-
-
-// ================= GET PENDING =================
-
-exports.getPending = async (req, res) => {
-  try {
-
-    const requests = await Request.find({
-      sender: req.user.id,
-      status: "pending",
-    }).populate("receiver", "name");
-
-    res.json(requests);
-
-  } catch (err) {
-
-    res.status(500).json({
-      error: err.message,
-    });
-  }
-};
-
 
 // ================= RESPOND REQUEST =================
 
-exports.respondRequest = async (req, res) => {
-
+exports.respondRequest = async (
+  req,
+  res
+) => {
   try {
-
-    const { requestId, action } = req.body;
+    const { requestId, action } =
+      req.body;
 
     const userId = req.user.id;
 
-    const request = await Request.findById(requestId);
+    const request =
+      await Request.findById(
+        requestId
+      );
 
     if (!request) {
-      return res
-        .status(404)
-        .json({
-          msg: "Request not found",
-        });
+      return res.status(404).json({
+        msg: "Request not found",
+      });
     }
 
-    // BOTH USERS MUST BE INVOLVED
+    // CHECK AUTHORIZATION
     const isInvolved =
-      request.receiver.toString() === userId ||
-      request.sender.toString() === userId;
+      request.receiver.toString() ===
+        userId ||
+      request.sender.toString() ===
+        userId;
 
     if (!isInvolved) {
-
-      return res
-        .status(403)
-        .json({
-          msg: "Not authorized",
-        });
+      return res.status(403).json({
+        msg: "Not authorized",
+      });
     }
 
     // ================= ACCEPT =================
-
     if (action === "accepted") {
-
       request.status = "accepted";
 
       await request.save();
 
-      // CHECK IF MATCH ALREADY EXISTS
-      const existingMatch = await Match.findOne({
-        users: {
-          $all: [
-            request.sender,
-            request.receiver,
-          ],
-        },
-      });
+      // CHECK EXISTING MATCH
+      const existingMatch =
+        await Match.findOne({
+          users: {
+            $all: [
+              request.sender,
+              request.receiver,
+            ],
+          },
+        });
 
-      // CREATE MATCH IF NOT EXISTS
+      // CREATE MATCH
       if (!existingMatch) {
-
         await Match.create({
           users: [
             request.sender,
@@ -210,16 +521,19 @@ exports.respondRequest = async (req, res) => {
         });
       }
 
-      // CLEAN DUPLICATE REQUESTS
+      // REMOVE DUPLICATE REQUESTS
       await Request.deleteMany({
         $or: [
           {
             sender: request.sender,
-            receiver: request.receiver,
+            receiver:
+              request.receiver,
           },
           {
-            sender: request.receiver,
-            receiver: request.sender,
+            sender:
+              request.receiver,
+            receiver:
+              request.sender,
           },
         ],
 
@@ -227,46 +541,38 @@ exports.respondRequest = async (req, res) => {
           $ne: request._id,
         },
       });
-
     }
 
     // ================= IGNORE =================
-
     else if (action === "ignored") {
-
       request.status = "ignored";
 
       await request.save();
     }
 
-    // ================= SKIP =================
-
+    // ================= SKIP/CANCEL =================
     else if (action === "skipped") {
-
       request.status = "skipped";
 
       await request.save();
     }
 
     // ================= INVALID =================
-
     else {
-
-      return res
-        .status(400)
-        .json({
-          msg: "Invalid action",
-        });
+      return res.status(400).json({
+        msg: "Invalid action",
+      });
     }
 
     res.json({
       msg: `Request ${action}`,
       request,
     });
-
   } catch (err) {
-
-    console.error("RESPOND ERROR:", err);
+    console.error(
+      "RESPOND REQUEST ERROR:",
+      err
+    );
 
     res.status(500).json({
       error: err.message,
@@ -274,19 +580,29 @@ exports.respondRequest = async (req, res) => {
   }
 };
 
-
 // ================= GET ALL USERS =================
 
-exports.getAllUsers = async (req, res) => {
-
+exports.getAllUsers = async (
+  req,
+  res
+) => {
   try {
+    const currentUserId =
+      req.user?.id;
 
-    const users = await User.find()
-      .select("-password");
+    const users =
+      await User.find({
+        _id: {
+          $ne: currentUserId,
+        },
+      }).select("-password");
 
     res.json(users);
-
   } catch (err) {
+    console.error(
+      "GET USERS ERROR:",
+      err
+    );
 
     res.status(500).json({
       error: err.message,
