@@ -15,6 +15,8 @@ import Discover from "./pages/Discover";
 import Matches from "./pages/Matches";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
+
+import Chats from "./pages/Chats";
 import Chat from "./pages/Chat";
 import VideoRoom from "./pages/VideoRoom";
 
@@ -122,6 +124,19 @@ function App() {
               <>
                 <Layout>
                   <Sessions />
+                </Layout>
+              </>
+            </PrivateRoute>
+          }
+        />
+
+          <Route
+          path="/chats"
+          element={
+            <PrivateRoute>
+              <>
+                <Layout>
+                  <Chats />
                 </Layout>
               </>
             </PrivateRoute>

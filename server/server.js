@@ -194,8 +194,6 @@ const chatRoutes = require("./routes/chat");
 
 dotenv.config();
 
-console.log("APP ID:", process.env.AGORA_APP_ID);
-console.log("CERT:", process.env.AGORA_APP_CERTIFICATE);
 connectDB();
 
 const app = express();

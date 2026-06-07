@@ -1,3 +1,43 @@
+// const {
+//   RtcTokenBuilder,
+//   RtcRole,
+// } = require("agora-access-token");
+
+// const generateAgoraToken = (
+//   channelName
+// ) => {
+
+//   const appID = process.env.AGORA_APP_ID;
+
+//   const appCertificate =
+//     process.env.AGORA_APP_CERTIFICATE;
+
+//   const uid = 0;
+
+//   const role = RtcRole.PUBLISHER;
+
+//   const expirationTimeInSeconds = 3600;
+
+//   const currentTimestamp =
+//     Math.floor(Date.now() / 1000);
+
+//   const privilegeExpiredTs =
+//     currentTimestamp + expirationTimeInSeconds;
+
+//   const token = RtcTokenBuilder.buildTokenWithUid(
+//     appID,
+//     appCertificate,
+//     channelName,
+//     uid,
+//     role,
+//     privilegeExpiredTs
+//   );
+
+//   return token;
+// };
+
+// module.exports = generateAgoraToken;
+
 const {
   RtcTokenBuilder,
   RtcRole,
@@ -6,34 +46,42 @@ const {
 const generateAgoraToken = (
   channelName
 ) => {
-
-  const appID = process.env.AGORA_APP_ID;
+  const appID =
+    process.env.AGORA_APP_ID;
 
   const appCertificate =
-    process.env.AGORA_APP_CERTIFICATE;
+    process.env
+      .AGORA_APP_CERTIFICATE;
 
   const uid = 0;
 
-  const role = RtcRole.PUBLISHER;
+  const role =
+    RtcRole.PUBLISHER;
 
-  const expirationTimeInSeconds = 3600;
+  const expirationTime =
+    3600;
 
   const currentTimestamp =
-    Math.floor(Date.now() / 1000);
+    Math.floor(
+      Date.now() / 1000
+    );
 
   const privilegeExpiredTs =
-    currentTimestamp + expirationTimeInSeconds;
+    currentTimestamp +
+    expirationTime;
 
-  const token = RtcTokenBuilder.buildTokenWithUid(
-    appID,
-    appCertificate,
-    channelName,
-    uid,
-    role,
-    privilegeExpiredTs
-  );
+  const token =
+    RtcTokenBuilder.buildTokenWithUid(
+      appID,
+      appCertificate,
+      channelName,
+      uid,
+      role,
+      privilegeExpiredTs
+    );
 
   return token;
 };
 
-module.exports = generateAgoraToken;
+module.exports =
+  generateAgoraToken;

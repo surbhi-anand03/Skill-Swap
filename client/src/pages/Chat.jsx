@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import {
   useEffect,
   useState,
@@ -17,6 +17,7 @@ import { io } from "socket.io-client";
 import {
   sendMessage,
   getMessages,
+  getConversations,
 } from "../api/api";
 
 // SOCKET
@@ -31,13 +32,25 @@ export default function Chat() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [conversations, setConversations] = useState([]);
 
   const bottomRef = useRef(null);
+
+  const loadConversations = async () => {
+    try {
+      const res = await getConversations();
+
+      setConversations(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   // ================= LOAD =================
   useEffect(() => {
 
     fetchMessages();
+    loadConversations();
 
     // JOIN USER
     socket.emit("join", currentUser);
@@ -229,7 +242,7 @@ const isOnline = onlineUsers.some(
         </div>
 
         {/* CHAT PREVIEW */}
-        <div className="flex-1 overflow-y-auto px-3 pb-3">
+        {/* <div className="flex-1 overflow-y-auto px-3 pb-3">
 
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-indigo-50 cursor-pointer hover:bg-indigo-100 transition">
 
@@ -261,7 +274,89 @@ const isOnline = onlineUsers.some(
 
           </div>
 
-        </div>
+        </div> */}
+
+        {/* CHAT LIST */}
+<div className="flex-1 overflow-y-auto px-3 pb-3">
+
+  {conversations.length === 0 ? (
+
+    <div className="text-center text-gray-500 mt-10">
+      No conversations yet
+    </div>
+
+  ) : (
+
+    conversations.map((chat) => {
+
+      const userId = chat.user._id;
+
+      const isUserOnline =
+        onlineUsers.some(
+          (u) =>
+            String(u.userId) ===
+            String(userId)
+        );
+
+      return (
+
+        <Link
+          key={userId}
+          to={`/chat/${userId}`}
+        >
+
+          <div
+            className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition mb-2 ${
+              String(id) === String(userId)
+                ? "bg-indigo-50"
+                : "hover:bg-gray-50"
+            }`}
+          >
+
+            <div className="relative">
+
+              <img
+                src="https://i.pravatar.cc/100"
+                alt=""
+                className="w-14 h-14 rounded-full object-cover"
+              />
+
+              <span
+                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                  isUserOnline
+                    ? "bg-green-500"
+                    : "bg-gray-400"
+                }`}
+              />
+
+            </div>
+
+            <div className="flex-1 min-w-0">
+
+              <div className="flex justify-between items-center">
+
+                <h3 className="font-semibold truncate">
+                  {chat.user.name}
+                </h3>
+
+              </div>
+
+              <p className="text-sm text-gray-500 truncate">
+                {chat.lastMessage}
+              </p>
+
+            </div>
+
+          </div>
+
+        </Link>
+
+      );
+    })
+
+  )}
+
+</div>
 
       </div>
 

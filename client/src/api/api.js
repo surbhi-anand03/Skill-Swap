@@ -121,5 +121,8 @@ export const sendMessage = (data) =>
 export const getMessages = (user1, user2) =>
   API.get(`/chat/${user1}/${user2}`);
 
+export const getConversations = () =>
+  API.get("/chat/conversations/all");
+
 // ================= EXPORT =================
 export default API;

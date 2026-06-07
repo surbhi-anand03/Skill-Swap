@@ -151,7 +151,7 @@ const UserCard = ({ user, refresh }) => {
 
           {state === "default" && (
             <>
-              <button
+              {/* <button
                 onClick={handleSkip}
                 disabled={loading}
                 className="flex-1 border border-gray-300 py-3 rounded-xl font-medium hover:bg-gray-50 transition"
@@ -160,7 +160,7 @@ const UserCard = ({ user, refresh }) => {
                   <X size={18} />
                   Skip
                 </div>
-              </button>
+              </button> */}
 
               <button
                 onClick={handleRequest}

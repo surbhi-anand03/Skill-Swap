@@ -59,7 +59,7 @@ const Discover = () => {
   return (
     <div className="min-h-screen bg-slate-50 pb-16">
       {/* HERO */}
-      <div className="max-w-7xl mx-auto px-4 pt-6">
+      {/* <div className="max-w-7xl mx-auto px-4 pt-6">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1445] via-[#311b92] to-[#7c3aed] px-12 py-14">
 
           <div className="absolute -top-12 right-20 w-48 h-48 bg-purple-400/20 rounded-full"></div>
@@ -91,7 +91,7 @@ const Discover = () => {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* RECOMMENDED */}
       <div className="max-w-7xl mx-auto px-4 mt-12">

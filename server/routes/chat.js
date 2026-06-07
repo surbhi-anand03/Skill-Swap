@@ -21,29 +21,12 @@ router.post("/send", auth, async (req, res) => {
 
     res.json(message);
   } catch (err) {
+    console.log("CONVERSATION ERROR:");
+    console.log(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-
-// GET CHAT MESSAGES
-
-router.get("/:user1/:user2", auth, async (req, res) => {
-  try {
-    const { user1, user2 } = req.params;
-
-    const messages = await Message.find({
-      $or: [
-        { sender: user1, receiver: user2 },
-        { sender: user2, receiver: user1 },
-      ],
-    }).sort({ createdAt: 1 });
-
-    res.json(messages);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // router.get("/:userId", auth, async (req, res) => {
 
@@ -76,5 +59,70 @@ router.get("/:user1/:user2", auth, async (req, res) => {
 
 //   }
 // });
+
+// GET ALL CONVERSATIONS
+router.get("/conversations/all", auth, async (req, res) => {
+  try {
+    const currentUser = req.user.id;
+
+    const messages = await Message.find({
+      $or: [
+        { sender: currentUser },
+        { receiver: currentUser },
+      ],
+    })
+      .sort({ createdAt: -1 })
+      .populate("sender", "name")
+      .populate("receiver", "name");
+
+    const conversations = {};
+
+    messages.forEach((msg) => {
+      const otherUser =
+        msg.sender._id.toString() === currentUser
+          ? msg.receiver
+          : msg.sender;
+
+      if (!conversations[otherUser._id]) {
+        conversations[otherUser._id] = {
+          user: otherUser,
+          lastMessage: msg.text,
+          updatedAt: msg.createdAt,
+        };
+      }
+    });
+
+    res.json(Object.values(conversations));
+
+  } catch (err) {
+    console.log("CONVERSATION ERROR:");
+    console.log(err);
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+});
+
+
+// GET CHAT MESSAGES
+
+router.get("/:user1/:user2", auth, async (req, res) => {
+  try {
+    const { user1, user2 } = req.params;
+
+    const messages = await Message.find({
+      $or: [
+        { sender: user1, receiver: user2 },
+        { sender: user2, receiver: user1 },
+      ],
+    }).sort({ createdAt: 1 });
+
+    res.json(messages);
+  } catch (err) {
+    console.log("CONVERSATION ERROR:");
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;
