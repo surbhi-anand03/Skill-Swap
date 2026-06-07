@@ -142,14 +142,25 @@ export default function Sessions() {
         <div className="space-y-4">
           {data.pending.length ===
           0 ? (
-            <div className="border bg-white p-10 text-center">
+            // <div className="border bg-white p-10 text-center">
+            //   <Clock3
+            //     className="mx-auto text-yellow-400 mb-3"
+            //     size={40}
+            //   />
+              
+            //   <h3>No Pending Sessions</h3>
+            // </div>
+            <div className="border border-dashed border-yellow-300 bg-yellow-50 p-14 text-center">
               <Clock3
-                className="mx-auto text-slate-300 mb-3"
+                className="mx-auto text-yellow-400 mb-3"
                 size={40}
               />
-              <p className="text-slate-500">
-                No pending sessions
-              </p>
+
+              <h3 className="font-semibold text-xl">
+                No Pending
+                sessions
+              </h3>
+
             </div>
           ) : (
             data.pending.map((s) => {

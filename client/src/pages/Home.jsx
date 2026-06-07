@@ -189,7 +189,7 @@ const profileCompletion = Math.round(
                 </div>
 
                 <h1 className="text-4xl xl:text-5xl font-bold text-gray-900 leading-tight">
-                  Welcome back,{" "}
+                  Welcome,{" "}
                   <span className="text-[#6C63FF]">
                     {profile?.name ||
                       "Learner"}
