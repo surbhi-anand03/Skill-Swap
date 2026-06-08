@@ -84,9 +84,50 @@ const UserCard = ({ user, refresh }) => {
         </div>
 
         {/* Avatar */}
-        <div className="absolute left-1/2 -bottom-12 transform -translate-x-1/2">
+        {/* <div className="absolute left-1/2 -bottom-12 transform -translate-x-1/2">
           <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-600 to-violet-500 flex items-center justify-center text-white text-4xl font-bold border-4 border-white shadow-lg">
             {user.name?.charAt(0)?.toUpperCase()}
+          </div>
+        </div> */}
+
+        <div className="absolute left-1/2 -bottom-12 transform -translate-x-1/2">
+          <div
+            className="
+              w-24
+              h-24
+              rounded-full
+              overflow-hidden
+              bg-gradient-to-r
+              from-purple-600
+              to-violet-500
+              flex
+              items-center
+              justify-center
+              text-white
+              text-4xl
+              font-bold
+              border-4
+              border-white
+              shadow-lg
+            "
+          >
+            {user?.profileImage ? (
+              <img
+                src={
+                  user.profileImage
+                }
+                alt="profile"
+                className="
+                  w-full
+                  h-full
+                  object-cover
+                "
+              />
+            ) : (
+              user.name
+                ?.charAt(0)
+                ?.toUpperCase()
+            )}
           </div>
         </div>
       </div>

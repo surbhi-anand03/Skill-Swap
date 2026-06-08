@@ -181,9 +181,45 @@ export default function Requests() {
                   >
                     <div className="flex gap-4">
 
-                      <div className="w-14 h-14 rounded-full bg-violet-100 flex items-center justify-center text-lg font-bold text-violet-700">
+                      {/* <div className="w-14 h-14 rounded-full bg-violet-100 flex items-center justify-center text-lg font-bold text-violet-700">
                         {req.sender?.name?.charAt(
                           0
+                        )}
+                      </div> */}
+
+                      <div
+                        className="
+                          w-14
+                          h-14
+                          rounded-full
+                          overflow-hidden
+                          bg-violet-100
+                          flex
+                          items-center
+                          justify-center
+                          text-lg
+                          font-bold
+                          text-violet-700
+                        "
+                      >
+                        {req.sender
+                          ?.profileImage ? (
+                          <img
+                            src={
+                              req.sender
+                                .profileImage
+                            }
+                            alt="profile"
+                            className="
+                              w-full
+                              h-full
+                              object-cover
+                            "
+                          />
+                        ) : (
+                          req.sender?.name?.charAt(
+                            0
+                          )
                         )}
                       </div>
 
@@ -281,11 +317,41 @@ export default function Requests() {
                   >
                     <div className="flex gap-4">
 
-                      <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-lg font-bold text-pink-700">
+                      {/* <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-lg font-bold text-pink-700">
                         {req.receiver?.name?.charAt(
                           0
                         )}
-                      </div>
+                      </div> */}
+
+                        <div
+                          className="
+                            w-14
+                            h-14
+                            rounded-full
+                            overflow-hidden
+                            bg-red-100
+                            flex
+                            items-center
+                            justify-center
+                            text-lg
+                            font-bold
+                            text-pink-700
+                          "
+                        >
+                          {req.receiver?.profileImage ? (
+                            <img
+                              src={req.receiver.profileImage}
+                              alt="profile"
+                              className="
+                                w-full
+                                h-full
+                                object-cover
+                              "
+                            />
+                          ) : (
+                            req.receiver?.name?.charAt(0)
+                          )}
+                        </div>
 
                       <div className="flex-1">
                         <h3 className="font-bold text-lg text-slate-900">

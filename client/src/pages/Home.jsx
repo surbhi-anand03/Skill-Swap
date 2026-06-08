@@ -209,9 +209,43 @@ const profileCompletion = Math.round(
 
                 <div className="flex items-center gap-4">
 
-                  <div className="w-16 h-16 rounded-2xl bg-[#6C63FF] text-white flex items-center justify-center text-xl font-bold">
+                  {/* <div className="w-16 h-16 rounded-2xl bg-[#6C63FF] text-white flex items-center justify-center text-xl font-bold">
                     {getInitials(
                       profile?.name
+                    )}
+                  </div> */}
+
+                  <div
+                    className="
+                      w-16
+                      h-16
+                      rounded-2xl
+                      overflow-hidden
+                      bg-[#6C63FF]
+                      text-white
+                      flex
+                      items-center
+                      justify-center
+                      text-xl
+                      font-bold
+                    "
+                  >
+                    {profile?.profileImage ? (
+                      <img
+                        src={
+                          profile.profileImage
+                        }
+                        alt="profile"
+                        className="
+                          w-full
+                          h-full
+                          object-cover
+                        "
+                      />
+                    ) : (
+                      getInitials(
+                        profile?.name
+                      )
                     )}
                   </div>
 
@@ -237,6 +271,7 @@ const profileCompletion = Math.round(
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
 

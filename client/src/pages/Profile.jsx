@@ -18,6 +18,7 @@ export default function Profile() {
     skillsOffered: "",
     skillsWanted: "",
     bio: "",
+    profileImage: "",
   });
 
   const [editMode, setEditMode] =
@@ -39,6 +40,8 @@ export default function Profile() {
             user.skillsWanted?.join(", ") ||
             "",
           bio: user.bio || "",
+          profileImage:
+            user.profileImage || "",
         });
       } catch (err) {
         if (err.response?.status === 401) {
@@ -57,6 +60,52 @@ export default function Profile() {
         e.target.value,
     });
   };
+
+  const handleImageUpload = async (
+  e
+) => {
+  const file =
+    e.target.files[0];
+
+  if (!file) return;
+
+  try {
+    const formData =
+      new FormData();
+
+    formData.append(
+      "image",
+      file
+    );
+
+    const res =
+      await API.put(
+        "/user/upload-image",
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+          },
+        }
+      );
+
+    setForm((prev) => ({
+      ...prev,
+      profileImage:
+        res.data.image,
+    }));
+
+    alert(
+      "Profile image uploaded ✅"
+    );
+  } catch (err) {
+    console.log(err);
+    alert(
+      "Image upload failed"
+    );
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,12 +171,10 @@ export default function Profile() {
             <div className="flex flex-col md:flex-row md:items-center gap-6">
 
               <div className="relative">
-
-                {/* <div className="w-32 h-32 rounded-full bg-violet-100 border-4 border-white shadow-lg flex items-center justify-center"> */}
-
                 <div
                   className="
                     w-32 h-32 rounded-full
+                    overflow-hidden
                     bg-gradient-to-br
                     from-violet-100
                     to-purple-100
@@ -135,34 +182,60 @@ export default function Profile() {
                     flex items-center justify-center
                   "
                 >
-
-                  {form.name ? (
+                  {form.profileImage ? (
+                    <img
+                      src={
+                        form.profileImage
+                      }
+                      alt="profile"
+                      className="
+                        w-full
+                        h-full
+                        object-cover
+                      "
+                    />
+                  ) : form.name ? (
                     <span className="text-5xl font-bold text-violet-700">
                       {form.name[0].toUpperCase()}
                     </span>
                   ) : (
                     <FaUserCircle className="text-7xl text-violet-400" />
                   )}
-
                 </div>
 
-                <button
-                  className="
-                    absolute
-                    bottom-1
-                    right-1
-                    w-10
-                    h-10
-                    rounded-full
-                    bg-violet-100
-                    shadow-md
-                    flex
-                    items-center
-                    justify-center
-                  "
-                >
-                  <FaCamera className="text-violet-600" />
-                </button>
+                {editMode && (
+                  <label
+                    className="
+                      absolute
+                      bottom-1
+                      right-1
+                      w-10
+                      h-10
+                      rounded-full
+                      bg-violet-100
+                      shadow-md
+                      flex
+                      items-center
+                      justify-center
+                      cursor-pointer
+                      hover:bg-violet-200
+                      transition
+                    "
+                  >
+                    <FaCamera className="text-violet-600" />
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={
+                        handleImageUpload
+                      }
+                    />
+                  </label>
+                )}
+
+             
 
               </div>
 
@@ -201,7 +274,6 @@ export default function Profile() {
             </div>
 
             {/* Form Card */}
-            {/* <div className="mt-10 border rounded-3xl p-8"> */}
               <div
                 className="
                   mt-8

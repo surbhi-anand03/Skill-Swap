@@ -127,6 +127,12 @@ export default function VideoRoom() {
         channelName,
       } = res.data;
 
+      console.log("AGORA RESPONSE:", {
+        appId,
+        token,
+        channelName,
+      });
+
       // JOIN
       await client.current.join(
         appId,

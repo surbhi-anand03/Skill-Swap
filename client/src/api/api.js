@@ -52,7 +52,7 @@ export const skipUser = (id) =>
 
 // ================= MATCHES =================
 export const getMatchesList = () =>
-  API.get("/user/matches");
+  API.get("/match");
 
 // ================= REQUESTS =================
 

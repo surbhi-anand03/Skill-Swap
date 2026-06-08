@@ -375,6 +375,7 @@ exports.getIncoming = async (req, res) => {
       skillsOffered
       skillsWanted
       bio
+      profileImage
       `
     );
 
@@ -403,6 +404,7 @@ exports.getPending = async (req, res) => {
       skillsOffered
       skillsWanted
       bio
+      profileImage
       `
     );
 
@@ -436,6 +438,7 @@ exports.getSkipped = async (req, res) => {
         skills
         skillsOffered
         skillsWanted
+        profileImage
         `
       )
       .populate(
@@ -445,6 +448,7 @@ exports.getSkipped = async (req, res) => {
         skills
         skillsOffered
         skillsWanted
+        profileImage
         `
       );
 
