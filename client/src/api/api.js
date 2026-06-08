@@ -52,7 +52,7 @@ export const skipUser = (id) =>
 
 // ================= MATCHES =================
 export const getMatchesList = () =>
-  API.get("/user/matches");
+  API.get("/match");
 
 // ================= REQUESTS =================
 
@@ -120,6 +120,9 @@ export const sendMessage = (data) =>
 // GET MESSAGES
 export const getMessages = (user1, user2) =>
   API.get(`/chat/${user1}/${user2}`);
+
+export const getConversations = () =>
+  API.get("/chat/conversations/all");
 
 // ================= EXPORT =================
 export default API;

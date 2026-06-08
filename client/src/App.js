@@ -2,12 +2,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import VerifyOtp from "./pages/VerifyOtp";
 import ForgotPassword from "./pages/ForgotPassword";
 import CompleteProfile from "./pages/CompleteProfile";
 
 import PrivateRoute from "./components/PrivateRoute";
-import Navbar from "./components/Navbar";
+// import Navbar from "./components/Navbar";
+import Layout from "./components/Layout";
 
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
@@ -15,8 +15,12 @@ import Discover from "./pages/Discover";
 import Matches from "./pages/Matches";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
+
+import Chats from "./pages/Chats";
 import Chat from "./pages/Chat";
 import VideoRoom from "./pages/VideoRoom";
+
+import Main from "./main/main";
 
 
 function App() {
@@ -26,13 +30,14 @@ function App() {
 
         {/* PUBLIC */}
         <Route path="/" element={<Login />} />
+        <Route path="/main" element={<Main />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
+        {/* <Route path="/verify-otp" element={<VerifyOtp />} /> */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/complete-profile" element={<CompleteProfile />} />
 
         {/* HOME */}
-        <Route
+        {/* <Route
           path="/home"
           element={
             <PrivateRoute>
@@ -42,7 +47,18 @@ function App() {
               </>
             </PrivateRoute>
           }
-        />
+        /> */}
+
+        <Route
+        path="/home"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <Home />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
 
         {/* PROFILE */}
         <Route
@@ -50,8 +66,9 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <Navbar />
-                <Profile />
+                <Layout>
+                  <Profile />
+                </Layout>
               </>
             </PrivateRoute>
           }
@@ -63,8 +80,9 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <Navbar />
-                <Discover />
+                <Layout>
+                  <Discover />
+                </Layout>
               </>
             </PrivateRoute>
           }
@@ -76,8 +94,9 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <Navbar />
-                <Matches />
+                <Layout>
+                  <Matches />
+                </Layout>
               </>
             </PrivateRoute>
           }
@@ -89,8 +108,9 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <Navbar />
-                <Requests />
+                <Layout>
+                  <Requests />
+                </Layout>
               </>
             </PrivateRoute>
           }
@@ -102,8 +122,22 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <Navbar />
-                <Sessions />
+                <Layout>
+                  <Sessions />
+                </Layout>
+              </>
+            </PrivateRoute>
+          }
+        />
+
+          <Route
+          path="/chats"
+          element={
+            <PrivateRoute>
+              <>
+                <Layout>
+                  <Chats />
+                </Layout>
               </>
             </PrivateRoute>
           }
@@ -115,8 +149,9 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <Navbar />
-                <Chat />
+                <Layout>
+                  <Chat />
+                </Layout>
               </>
             </PrivateRoute>
           }
@@ -127,8 +162,9 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <Navbar />
-                <VideoRoom />
+                <Layout>
+                  <VideoRoom />
+                </Layout>
               </>
             </PrivateRoute>
           }

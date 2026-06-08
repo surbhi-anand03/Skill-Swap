@@ -11,6 +11,11 @@ const userSchema = new mongoose.Schema({
   otp: String,
   otpExpiry: Date,
 
+  profileImage: {
+    type: String,
+    default: "",
+  },
+
   skillsOffered: [String],
   skillsWanted: [String],
 
@@ -32,4 +37,8 @@ skippedUsers: [
 
 }, { timestamps: true });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports =
+  mongoose.model(
+    "User",
+    userSchema
+  );
