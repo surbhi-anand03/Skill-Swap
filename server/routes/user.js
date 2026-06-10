@@ -255,11 +255,11 @@ router.get(
         })
           .populate(
             "sender",
-            "name email skillsOffered skillsWanted bio"
+            "name email skillsOffered skillsWanted bio profileImage"
           )
           .populate(
             "receiver",
-            "name email skillsOffered skillsWanted bio"
+            "name email skillsOffered skillsWanted bio profileImage"
           );
 
       const uniqueMatches =

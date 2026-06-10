@@ -120,7 +120,7 @@ export default function Sessions() {
       <section className="mb-10">
         <div className="flex items-center gap-3 mb-4">
           <Clock3
-            className="text-yellow-500"
+            className="text-violet-500"
             size={24}
           />
           <div>
@@ -142,9 +142,9 @@ export default function Sessions() {
         <div className="space-y-4">
           {data.pending.length ===
           0 ? (
-            <div className="border border-dashed border-yellow-300 bg-yellow-50 p-14 text-center">
+            <div className="border border-dashed border-violet-300 bg-violet-50 p-14 text-center">
               <Clock3
-                className="mx-auto text-yellow-400 mb-3"
+                className="mx-auto text-violet-600 mb-3"
                 size={40}
               />
 
@@ -163,13 +163,13 @@ export default function Sessions() {
               return (
                 <div
                   key={s._id}
-                  className="bg-white border border-slate-200 border-l-4 border-l-yellow-500 p-6 shadow-sm"
+                  className="bg-white border border-slate-200 border-l-4 border-l-violet-500 p-6 shadow-sm"
                 >
                   <div className="flex justify-between items-center">
 
                     {/* LEFT */}
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      <div className="w-14 h-14 bg-violet-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                         {getAvatar(
                           s.hostUser,
                           s.participantUser
@@ -190,11 +190,11 @@ export default function Sessions() {
                           }
                         </h3>
 
-                        <div className="flex items-center gap-2 text-slate-500 mt-1">
+                        <div className="flex items-center gap-2 text-violet-600 mt-1">
                           <Zap
                             size={14}
                           />
-                          <span>
+                          <span className="text-violet-600">
                             {s.sessionType ===
                             "instant"
                               ? "Instant Session"
@@ -208,7 +208,7 @@ export default function Sessions() {
                     <div className="flex items-center gap-3">
 
                       {isCreator ? (
-                        <button className="bg-yellow-100 text-yellow-700 px-5 py-2 font-medium">
+                        <button className="bg-violet-100 text-violet-700 px-5 py-2 font-medium">
                           Waiting for
                           response
                         </button>
@@ -331,10 +331,15 @@ export default function Sessions() {
                           }
                         </h3>
 
-                        <p className="text-slate-500">
+                        {/* <p className="text-slate-500">
                           {new Date(
                             s.startTime
-                          ).toLocaleString()}
+                          ).toLocaleString() || "Instant"}
+                        </p> */}
+                        <p className="text-slate-700">
+                          {s.startTime
+                            ? new Date(s.startTime).toLocaleString()
+                            : "Instant Session"}
                         </p>
                       </div>
                     </div>
@@ -426,7 +431,7 @@ export default function Sessions() {
                         }
                       </h3>
 
-                      <p className="text-slate-500 text-sm mt-1">
+                      <p className="text-slate-800 mt-1">
                         Duration:{" "}
                         {s.duration ||
                           "0 mins"}

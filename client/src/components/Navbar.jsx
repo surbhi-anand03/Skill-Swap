@@ -9,7 +9,13 @@ import {
   FaSignOutAlt,
   FaBell,
   FaComments,
+  FaCompass,
+  FaExchangeAlt
 } from "react-icons/fa";
+
+import {
+  Compass,
+} from "lucide-react";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -27,7 +33,7 @@ export default function Navbar() {
       className={`flex items-center gap-4 px-4 py-4 rounded-xl transition
       ${
         location.pathname === path
-          ? "bg-indigo-100 text-indigo-600 font-semibold"
+          ? "bg-violet-100 text-violet-600 font-semibold"
           : "text-gray-700 hover:bg-gray-100"
       }`}
     >
@@ -42,7 +48,7 @@ export default function Navbar() {
       {/* Logo */}
       <div className="p-6 border-b">
         <h2
-          className="text-3xl font-bold text-indigo-600 cursor-pointer"
+          className="text-3xl font-bold text-violet-600 cursor-pointer"
           onClick={() => navigate("/home")}
         >
           SkillSwap
@@ -52,42 +58,42 @@ export default function Navbar() {
       {/* Menu */}
       <div className="flex flex-col gap-2 p-4 flex-1">
 
-        {navItem("/home", <FaHome />, "Dashboard")}
+        {navItem("/home", <FaHome size={20}/>, "Dashboard")}
 
         {navItem(
           "/discover",
-          <FaSearch />,
+          <FaCompass size={22}/>,
           "Discover"
         )}
 
         {navItem(
           "/requests",
-          <FaBell />,
+          <FaUsers size={20}/>,
           "Requests"
         )}
 
         {navItem(
           "/matches",
-          <FaUsers />,
-          "Matches"
+          <FaExchangeAlt size={20} />,
+          "Swaps"
         )}
 
         {navItem(
           "/sessions",
-          <FaVideo />,
+          <FaVideo size={20} />,
           "Sessions"
         )}
 
 
         {navItem(
           "/chats",
-          <FaComments />,
+          <FaComments size={20} />,
           "Chats"
         )}
 
         {navItem(
           "/profile",
-          <FaUserCircle />,
+          <FaUserCircle size={20} />,
           "Profile"
         )}
 
@@ -98,7 +104,7 @@ export default function Navbar() {
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 text-red-500 px-4 py-3 rounded-lg hover:bg-red-50 w-full"
+          className="flex items-center gap-3 text-red-500 px-4 py-3 rounded-lg hover:bg-red-100 w-full"
         >
           <FaSignOutAlt />
           Logout
