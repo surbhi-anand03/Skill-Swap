@@ -1,9 +1,8 @@
-
+const dotenv = require("dotenv");
+dotenv.config();
 
 const express = require("express");
-const dotenv = require("dotenv");
 const cors = require("cors");
-
 const http = require("http");
 const { Server } = require("socket.io");
 
@@ -17,12 +16,6 @@ const userRoutes = require("./routes/user");const requestRoutes = require("./rou
 const matchRoutes = require("./routes/match");
 const sessionRoutes = require("./routes/session");
 const chatRoutes = require("./routes/chat");
-
-dotenv.config();
-
-console.log("CLOUD_NAME:", process.env.CLOUD_NAME);
-console.log("CLOUD_API_KEY:", process.env.CLOUD_API_KEY);
-console.log("CLOUD_API_SECRET:", process.env.CLOUD_API_SECRET);
 
 connectDB();
 

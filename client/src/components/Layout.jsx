@@ -1,11 +1,54 @@
+// import Navbar from "./Navbar";
+
+// export default function Layout({
+//   children,
+// }) {
+//   return (
+//     <div className="min-h-screen bg-gray-50">
+//       <Navbar />
+
+//       <main
+//         className="
+//           w-full
+//           lg:ml-64
+//           pt-20
+//           lg:pt-0
+//           pb-20
+//           lg:pb-0
+//           min-h-screen
+//         "
+//       >
+//         {children}
+//       </main>
+//     </div>
+//   );
+// }
+
 import Navbar from "./Navbar";
 
-export default function Layout({ children }) {
+export default function Layout({
+  children,
+}) {
   return (
-    <div className="flex">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
 
-      <main className="ml-72 flex-1 min-h-screen bg-gray-50">
+      <main
+      className="
+        w-full
+        min-h-screen
+        overflow-x-hidden
+        pt-16
+        pb-20
+        px-0
+        md:px-0
+        lg:ml-[280px]
+        lg:w-[calc(100%-280px)]
+        lg:pt-0
+        lg:pb-0
+      "
+    >
+
         {children}
       </main>
     </div>

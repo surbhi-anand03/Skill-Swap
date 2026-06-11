@@ -161,52 +161,6 @@ exports.likeUser =
   };
 
 // ================= UPLOAD PROFILE IMAGE =================
-// exports.uploadProfileImage =
-//   async (req, res) => {
-//     try {
-//       const user =
-//         await User.findById(
-//           req.user.id
-//         );
-
-//       if (!user) {
-//         return res
-//           .status(404)
-//           .json({
-//             message:
-//               "User not found",
-//           });
-//       }
-
-//       if (!req.file) {
-//         return res
-//           .status(400)
-//           .json({
-//             message:
-//               "No image uploaded",
-//           });
-//       }
-
-//       // Cloudinary URL
-//       user.profileImage =
-//         req.file.path;
-
-//       await user.save();
-
-//       res.status(200).json({
-//         success: true,
-//         image:
-//           user.profileImage,
-//       });
-//     } catch (error) {
-//       console.log(error);
-
-//       res.status(500).json({
-//         message:
-//           "Upload failed",
-//       });
-//     }
-//   };
 
 exports.uploadProfileImage =
   async (req, res) => {

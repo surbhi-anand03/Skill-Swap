@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import {
   getSessions,
   acceptSession,
-  rejectSession
+  rejectSession,
 } from "../api/api";
 
 import {
@@ -14,7 +14,7 @@ import {
   Video,
   Zap,
   X,
-  Check
+  Check,
 } from "lucide-react";
 
 export default function Sessions() {
@@ -68,13 +68,15 @@ export default function Sessions() {
 
   const canJoin = (session) => {
     if (
-      session.sessionType === "instant"
+      session.sessionType ===
+      "instant"
     ) {
       return true;
     }
 
-    const start =
-      new Date(session.startTime);
+    const start = new Date(
+      session.startTime
+    );
 
     const now = new Date();
 
@@ -90,26 +92,31 @@ export default function Sessions() {
 
   /* ================= AVATAR ================= */
 
-  const getAvatar = (host, participant) => {
+  const getAvatar = (
+    host,
+    participant
+  ) => {
     const first =
       host?.name?.charAt(0) || "";
 
     const second =
-      participant?.name?.charAt(0) || "";
+      participant?.name?.charAt(
+        0
+      ) || "";
 
     return `${first}${second}`.toUpperCase();
   };
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen p-8">
+    <div className="bg-[#f8fafc] min-h-screen px-4 sm:px-6 md:px-8 py-6 overflow-x-hidden">
 
       {/* HEADER */}
       <div className="mb-10">
-        <h1 className="text-5xl font-bold text-slate-900">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
           Sessions
         </h1>
 
-        <p className="text-slate-500 mt-2 text-lg">
+        <p className="text-slate-500 mt-2 text-sm sm:text-base lg:text-lg">
           Manage your teaching and
           learning sessions
         </p>
@@ -123,6 +130,7 @@ export default function Sessions() {
             className="text-violet-500"
             size={24}
           />
+
           <div>
             <h2 className="text-2xl font-bold text-slate-900">
               Pending
@@ -130,9 +138,12 @@ export default function Sessions() {
 
             <p className="text-slate-500">
               You have{" "}
-              {data.pending.length}{" "}
+              {
+                data.pending.length
+              }{" "}
               pending request
-              {data.pending.length !== 1
+              {data.pending.length !==
+              1
                 ? "s"
                 : ""}
             </p>
@@ -152,7 +163,6 @@ export default function Sessions() {
                 No Pending
                 sessions
               </h3>
-
             </div>
           ) : (
             data.pending.map((s) => {
@@ -163,21 +173,21 @@ export default function Sessions() {
               return (
                 <div
                   key={s._id}
-                  className="bg-white border border-slate-200 border-l-4 border-l-violet-500 p-6 shadow-sm"
+                  className="bg-white border border-slate-200 border-l-4 border-l-violet-500 p-4 sm:p-5 lg:p-6 shadow-sm"
                 >
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-5">
 
                     {/* LEFT */}
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-violet-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    <div className="flex items-start sm:items-center gap-4 min-w-0">
+                      <div className="w-14 h-14 bg-violet-600 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0">
                         {getAvatar(
                           s.hostUser,
                           s.participantUser
                         )}
                       </div>
 
-                      <div>
-                        <h3 className="font-bold text-xl text-slate-900">
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-lg sm:text-xl text-slate-900 break-words">
                           {
                             s.hostUser
                               ?.name
@@ -190,11 +200,12 @@ export default function Sessions() {
                           }
                         </h3>
 
-                        <div className="flex items-center gap-2 text-violet-600 mt-1">
+                        <div className="flex flex-wrap items-center gap-2 text-violet-600 mt-1">
                           <Zap
                             size={14}
                           />
-                          <span className="text-violet-600">
+
+                          <span>
                             {s.sessionType ===
                             "instant"
                               ? "Instant Session"
@@ -205,10 +216,10 @@ export default function Sessions() {
                     </div>
 
                     {/* RIGHT */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
 
                       {isCreator ? (
-                        <button className="bg-violet-100 text-violet-700 px-5 py-2 font-medium">
+                        <button className="bg-violet-100 text-violet-700 px-5 py-2 font-medium w-full sm:w-auto">
                           Waiting for
                           response
                         </button>
@@ -220,7 +231,7 @@ export default function Sessions() {
                                 s._id
                               )
                             }
-                            className="bg-green-100 text-green-700 px-5 py-2 flex items-center gap-2 font-medium"
+                            className="w-full sm:w-auto bg-green-100 text-green-700 px-5 py-2 flex items-center justify-center gap-2 font-medium"
                           >
                             <Check
                               size={18}
@@ -234,7 +245,7 @@ export default function Sessions() {
                                 s._id
                               )
                             }
-                            className="bg-red-100 text-red-600 px-5 py-2 flex items-center gap-2 font-medium"
+                            className="w-full sm:w-auto bg-red-100 text-red-600 px-5 py-2 flex items-center justify-center gap-2 font-medium"
                           >
                             <X
                               size={18}
@@ -269,11 +280,12 @@ export default function Sessions() {
             <p className="text-slate-500">
               You have{" "}
               {
-                data.upcoming.length
+                data.upcoming
+                  .length
               }{" "}
               upcoming session
-              {data.upcoming.length !==
-              1
+              {data.upcoming
+                .length !== 1
                 ? "s"
                 : ""}
             </p>
@@ -296,8 +308,8 @@ export default function Sessions() {
 
               <p className="text-slate-500 mt-2">
                 Your scheduled
-                sessions will appear
-                here.
+                sessions will
+                appear here.
               </p>
             </div>
           ) : (
@@ -305,20 +317,20 @@ export default function Sessions() {
               (s) => (
                 <div
                   key={s._id}
-                  className="bg-white border border-slate-200 border-l-4 border-l-blue-600 p-6 shadow-sm"
+                  className="bg-white border border-slate-200 border-l-4 border-l-blue-600 p-4 sm:p-5 lg:p-6 shadow-sm"
                 >
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-5">
 
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    <div className="flex items-start sm:items-center gap-4 min-w-0">
+                      <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0">
                         {getAvatar(
                           s.hostUser,
                           s.participantUser
                         )}
                       </div>
 
-                      <div>
-                        <h3 className="font-bold text-xl">
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-lg sm:text-xl break-words">
                           {
                             s.hostUser
                               ?.name
@@ -331,14 +343,11 @@ export default function Sessions() {
                           }
                         </h3>
 
-                        {/* <p className="text-slate-500">
-                          {new Date(
-                            s.startTime
-                          ).toLocaleString() || "Instant"}
-                        </p> */}
-                        <p className="text-slate-700">
+                        <p className="text-slate-700 break-words">
                           {s.startTime
-                            ? new Date(s.startTime).toLocaleString()
+                            ? new Date(
+                                s.startTime
+                              ).toLocaleString()
                             : "Instant Session"}
                         </p>
                       </div>
@@ -355,7 +364,7 @@ export default function Sessions() {
                           s._id
                         )
                       }
-                      className={`px-6 py-3 text-white flex items-center gap-2 font-medium ${
+                      className={`w-full sm:w-auto px-6 py-3 text-white flex items-center justify-center gap-2 font-medium ${
                         canJoin(s)
                           ? "bg-blue-600"
                           : "bg-slate-400 cursor-not-allowed"
@@ -364,6 +373,7 @@ export default function Sessions() {
                       <Video
                         size={18}
                       />
+
                       {canJoin(s)
                         ? "Join"
                         : "Available 10 mins before"}
@@ -393,7 +403,8 @@ export default function Sessions() {
             <p className="text-slate-500">
               You have{" "}
               {
-                data.completed.length
+                data.completed
+                  .length
               }{" "}
               completed sessions
             </p>
@@ -405,20 +416,20 @@ export default function Sessions() {
             (s) => (
               <div
                 key={s._id}
-                className="bg-white border border-slate-200 border-l-4 border-l-green-500 p-6 shadow-sm"
+                className="bg-white border border-slate-200 border-l-4 border-l-green-500 p-4 sm:p-5 lg:p-6 shadow-sm"
               >
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-5">
 
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  <div className="flex items-start sm:items-center gap-4 min-w-0">
+                    <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0">
                       {getAvatar(
                         s.hostUser,
                         s.participantUser
                       )}
                     </div>
 
-                    <div>
-                      <h3 className="font-bold text-xl">
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-lg sm:text-xl break-words">
                         {
                           s.hostUser
                             ?.name
@@ -431,7 +442,7 @@ export default function Sessions() {
                         }
                       </h3>
 
-                      <p className="text-slate-800 mt-1">
+                      <p className="text-slate-800 mt-1 break-words">
                         Duration:{" "}
                         {s.duration ||
                           "0 mins"}
@@ -444,7 +455,12 @@ export default function Sessions() {
                     </div>
                   </div>
 
-                  <CheckCircle className="text-green-500" />
+                  <div className="flex justify-center md:justify-center lg:justify-center">
+                    <CheckCircle
+                      className="text-green-500 shrink-0"
+                      size={28}
+                    />
+                  </div>
                 </div>
               </div>
             )
