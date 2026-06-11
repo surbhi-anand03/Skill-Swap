@@ -34,6 +34,12 @@ export default function Chat() {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [conversations, setConversations] = useState([]);
 
+const selectedChat = conversations.find(
+  (chat) => String(chat.user?._id) === String(id)
+);
+
+const selectedUser = selectedChat?.user;
+
   const bottomRef = useRef(null);
 
   const loadConversations = async () => {
@@ -164,10 +170,9 @@ const handleOnlineUsers = (users) => {
 const res = await sendMessage(newMsg);
 
 // INSTANTLY UPDATE SENDER UI
-setMessages((prev) => [
-  ...prev,
-  res.data,
-]);
+setMessages((prev) => [...prev, res.data]);
+
+loadConversations();
 
 // SEND TO RECEIVER
 socket.emit(
@@ -176,6 +181,8 @@ socket.emit(
 );
 
 setMessage("");
+
+loadConversations();
     } catch (err) {
 
       console.log(err);
@@ -280,31 +287,21 @@ const isOnline = onlineUsers.some(
 <div className="flex-1 overflow-y-auto px-3 pb-3">
 
   {conversations.length === 0 ? (
-
     <div className="text-center text-gray-500 mt-10">
       No conversations yet
     </div>
-
   ) : (
-
     conversations.map((chat) => {
 
-      const userId = chat.user._id;
+      const userId = chat.user?._id;
 
-      const isUserOnline =
-        onlineUsers.some(
-          (u) =>
-            String(u.userId) ===
-            String(userId)
-        );
+      const isUserOnline = onlineUsers.some(
+        (u) => String(u.userId) === String(userId)
+      );
 
       return (
-
-        <Link
-          key={userId}
-          to={`/chat/${userId}`}
-        >
-
+        <Link key={userId} to={`/chat/${userId}`}>
+          
           <div
             className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition mb-2 ${
               String(id) === String(userId)
@@ -313,33 +310,32 @@ const isOnline = onlineUsers.some(
             }`}
           >
 
-            <div className="relative">
+            {/* 👇 YOUR CODE (WITH ONLINE DOT ADDED) */}
+            <div className="relative w-10 h-10 flex-shrink-0">
 
               <img
-                src="https://i.pravatar.cc/100"
-                alt=""
-                className="w-14 h-14 rounded-full object-cover"
+                src={
+                  chat.user?.profileImage ||
+                  `https://ui-avatars.com/api/?name=${chat.user?.name}`
+                }
+                className="w-full h-full rounded-full object-cover"
+                alt="avatar"
               />
 
+              {/* online dot */}
               <span
                 className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                  isUserOnline
-                    ? "bg-green-500"
-                    : "bg-gray-400"
+                  isUserOnline ? "bg-green-500" : "bg-gray-400"
                 }`}
               />
-
             </div>
 
-            <div className="flex-1 min-w-0">
+            {/* 👇 TEXT PART (your code) */}
+            <div className="flex flex-col flex-1 min-w-0">
 
-              <div className="flex justify-between items-center">
-
-                <h3 className="font-semibold truncate">
-                  {chat.user.name}
-                </h3>
-
-              </div>
+              <p className="font-semibold truncate">
+                {chat.user?.name}
+              </p>
 
               <p className="text-sm text-gray-500 truncate">
                 {chat.lastMessage}
@@ -350,10 +346,8 @@ const isOnline = onlineUsers.some(
           </div>
 
         </Link>
-
       );
     })
-
   )}
 
 </div>
@@ -368,19 +362,22 @@ const isOnline = onlineUsers.some(
         <div className="bg-white px-6 py-4 border-b flex items-center justify-between shadow-sm">
 
           <div className="flex items-center gap-4">
-
-            <img
-              src="https://i.pravatar.cc/150"
-              alt=""
-              className="w-14 h-14 rounded-full object-cover"
-            />
+<img
+  src={
+    selectedUser?.profileImage ||
+    `https://ui-avatars.com/api/?name=${selectedUser?.name || "User"}`
+  }
+  alt={selectedUser?.name}
+  className="w-14 h-14 rounded-full object-cover"
+  onError={(e) => {
+    e.target.src = `https://ui-avatars.com/api/?name=${selectedUser?.name || "User"}`;
+  }}
+/>
 
             <div>
-
-              <h2 className="font-bold text-xl">
-                User Chat
-              </h2>
-
+<h2 className="font-bold text-xl">
+  {selectedUser?.name || "Loading..."}
+</h2>
               <div className="flex items-center gap-2 mt-1">
 
                 <FaCircle

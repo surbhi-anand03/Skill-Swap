@@ -151,11 +151,13 @@ export default function Chats() {
                       {/* AVATAR */}
                       <div className="relative">
                         <img
-                          src={`https://ui-avatars.com/api/?name=${chat.user.name}&background=random`}
-                          alt=""
-                          className="w-14 h-14 rounded-full object-cover"
-                        />
-
+  src={
+    chat.user?.profileImage ||
+    `https://ui-avatars.com/api/?name=${chat.user.name}&background=random`
+  }
+  alt={chat.user.name}
+  className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+/>
                         {/* ONLINE DOT */}
                         <span
                           className={`absolute bottom-1 right-1 w-3 h-3 rounded-full border-2 border-white ${

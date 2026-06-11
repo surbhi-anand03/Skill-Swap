@@ -72,9 +72,8 @@ router.get("/conversations/all", auth, async (req, res) => {
       ],
     })
       .sort({ createdAt: -1 })
-      .populate("sender", "name")
-      .populate("receiver", "name");
-
+     .populate("sender", "name profileImage")
+     .populate("receiver", "name profileImage");
     const conversations = {};
 
     messages.forEach((msg) => {
