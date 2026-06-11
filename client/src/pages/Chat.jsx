@@ -12,6 +12,7 @@ import {
   FaCircle,
 } from "react-icons/fa";
 
+
 import { io } from "socket.io-client";
 
 import {
@@ -27,17 +28,21 @@ export default function Chat() {
 
   const { id } = useParams();
 
+
+  
+
   const currentUser = localStorage.getItem("userId");
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [conversations, setConversations] = useState([]);
+const selectedChatId = id;
 
 const selectedChat = conversations.find(
-  (chat) => String(chat.user?._id) === String(id)
+  (chat) =>
+    String(chat.user?._id) === String(selectedChatId)
 );
-
 const selectedUser = selectedChat?.user;
 
   const bottomRef = useRef(null);
@@ -53,15 +58,19 @@ const selectedUser = selectedChat?.user;
   };
 
   // ================= LOAD =================
-  useEffect(() => {
+useEffect(() => {
+  loadConversations();
+  socket.emit("join", currentUser);
+}, []);
 
+
+
+
+useEffect(() => {
+  if (selectedChatId) {
     fetchMessages();
-    loadConversations();
-
-    // JOIN USER
-    socket.emit("join", currentUser);
-
-  }, [id]);
+  }
+}, [selectedChatId]);
 
   // ================= AUTO SCROLL =================
   useEffect(() => {
@@ -80,8 +89,8 @@ const selectedUser = selectedChat?.user;
       // ONLY ADD MESSAGE IF IT BELONGS TO CURRENT CHAT
       if (
         (data.sender === currentUser &&
-          data.receiver === id) ||
-        (data.sender === id &&
+          data.receiver === selectedChatId) ||
+        (data.sender === selectedChatId &&
           data.receiver === currentUser)
       ) {
 
@@ -124,7 +133,7 @@ const handleOnlineUsers = (users) => {
 
     };
 
-  }, [currentUser, id]);
+  }, [currentUser, selectedChatId]);
 
   // ================= FETCH MESSAGES =================
   const fetchMessages = async () => {
@@ -133,7 +142,7 @@ const handleOnlineUsers = (users) => {
 
       const res = await getMessages(
         currentUser,
-        id
+        selectedChatId
       );
 
       // SORT BY TIME
@@ -163,7 +172,7 @@ const handleOnlineUsers = (users) => {
 
       const newMsg = {
         sender: currentUser,
-        receiver: id,
+        receiver: selectedChatId,
         text: message,
       };
 // SAVE IN DB
@@ -205,7 +214,7 @@ loadConversations();
   // ================= ONLINE STATUS =================
 const isOnline = onlineUsers.some(
   (user) =>
-    String(user.userId) === String(id)
+    String(user.userId) === String(selectedChatId)
 );
 
   return (
@@ -214,8 +223,8 @@ const isOnline = onlineUsers.some(
 
       {/* ================= SIDEBAR ================= */}
 
-      <div className="w-[350px] bg-white border-r hidden md:flex flex-col">
-
+      
+<div className="w-full md:w-[340px] bg-white border-r flex flex-col">
         {/* TOP */}
         <div className="p-5 border-b flex items-center justify-between">
 
@@ -234,7 +243,7 @@ const isOnline = onlineUsers.some(
         {/* SEARCH */}
         <div className="p-4">
 
-          <div className="flex items-center gap-3 bg-gray-100 px-4 py-3 rounded-xl">
+          <div className="flex items-center gap-3 bg-gray-100 px-4 py-3 rounded-2xl">
 
             <FaSearch className="text-gray-400" />
 
@@ -248,42 +257,7 @@ const isOnline = onlineUsers.some(
 
         </div>
 
-        {/* CHAT PREVIEW */}
-        {/* <div className="flex-1 overflow-y-auto px-3 pb-3">
 
-          <div className="flex items-center gap-3 p-3 rounded-2xl bg-indigo-50 cursor-pointer hover:bg-indigo-100 transition">
-
-            <img
-              src="https://i.pravatar.cc/100"
-              alt=""
-              className="w-14 h-14 rounded-full object-cover"
-            />
-
-            <div className="flex-1">
-
-              <div className="flex justify-between items-center">
-
-                <h3 className="font-semibold">
-                  Current Chat
-                </h3>
-
-                <span className="text-xs text-gray-500">
-                  Active
-                </span>
-
-              </div>
-
-              <p className="text-sm text-gray-500 truncate">
-                Open conversation
-              </p>
-
-            </div>
-
-          </div>
-
-        </div> */}
-
-        {/* CHAT LIST */}
 <div className="flex-1 overflow-y-auto px-3 pb-3">
 
   {conversations.length === 0 ? (
@@ -302,23 +276,22 @@ const isOnline = onlineUsers.some(
       return (
         <Link key={userId} to={`/chat/${userId}`}>
           
-          <div
-            className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition mb-2 ${
-              String(id) === String(userId)
-                ? "bg-indigo-50"
-                : "hover:bg-gray-50"
-            }`}
-          >
+         <div
+  className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition mb-2 hover:bg-gray-50 ${
+  String(id) === String(userId)
+  ? "bg-indigo-50"
+  : ""
+  }`}
+>
 
             {/* 👇 YOUR CODE (WITH ONLINE DOT ADDED) */}
-            <div className="relative w-10 h-10 flex-shrink-0">
-
+           <div className="relative">
               <img
-                src={
-                  chat.user?.profileImage ||
-                  `https://ui-avatars.com/api/?name=${chat.user?.name}`
-                }
-                className="w-full h-full rounded-full object-cover"
+               src={
+  chat.user?.profileImage ||
+  `https://ui-avatars.com/api/?name=${chat.user?.name}&background=6366f1&color=fff`
+}
+               className="w-14 h-14 rounded-full object-cover flex-shrink-0"
                 alt="avatar"
               />
 
@@ -331,17 +304,30 @@ const isOnline = onlineUsers.some(
             </div>
 
             {/* 👇 TEXT PART (your code) */}
-            <div className="flex flex-col flex-1 min-w-0">
+<div className="flex-1 min-w-0">
 
-              <p className="font-semibold truncate">
-                {chat.user?.name}
-              </p>
+  <div className="flex justify-between items-center">
 
-              <p className="text-sm text-gray-500 truncate">
-                {chat.lastMessage}
-              </p>
+    <p className="font-semibold truncate">
+      {chat.user?.name}
+    </p>
 
-            </div>
+    <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+      {chat.updatedAt
+        ? new Date(chat.updatedAt).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : ""}
+    </span>
+
+  </div>
+
+  <p className="text-sm text-gray-500 truncate">
+    {chat.lastMessage}
+  </p>
+
+</div>
 
           </div>
 
@@ -356,7 +342,23 @@ const isOnline = onlineUsers.some(
 
       {/* ================= CHAT AREA ================= */}
 
-      <div className="flex-1 flex flex-col">
+     {!selectedChatId ? (
+
+  <div className="flex-1 flex items-center justify-center bg-gray-100">
+    <div className="text-center">
+      <h2 className="text-2xl font-bold text-gray-700">
+        SkillSwap Chat
+      </h2>
+
+      <p className="text-gray-500 mt-2">
+        Select a conversation to start chatting
+      </p>
+    </div>
+  </div>
+
+) : (
+
+  <div className="flex-1 flex flex-col">
 
         {/* HEADER */}
         <div className="bg-white px-6 py-4 border-b flex items-center justify-between shadow-sm">
@@ -364,13 +366,13 @@ const isOnline = onlineUsers.some(
           <div className="flex items-center gap-4">
 <img
   src={
-    selectedUser?.profileImage ||
-    `https://ui-avatars.com/api/?name=${selectedUser?.name || "User"}`
-  }
+  selectedUser?.profileImage ||
+  `https://ui-avatars.com/api/?name=${selectedUser?.name || "User"}&background=6366f1&color=fff`
+}
   alt={selectedUser?.name}
   className="w-14 h-14 rounded-full object-cover"
   onError={(e) => {
-    e.target.src = `https://ui-avatars.com/api/?name=${selectedUser?.name || "User"}`;
+  e.target.src = `https://ui-avatars.com/api/?name=${selectedUser?.name || "User"}&background=6366f1&color=fff`;
   }}
 />
 
@@ -407,6 +409,9 @@ const isOnline = onlineUsers.some(
             <FaEllipsisV />
 
           </button>
+
+
+    
 
         </div>
 
@@ -497,9 +502,11 @@ const isOnline = onlineUsers.some(
 
           </div>
 
-        </div>
+               </div>
 
       </div>
+
+)}
 
     </div>
   );

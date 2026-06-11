@@ -130,33 +130,27 @@ function App() {
           }
         />
 
-          <Route
-          path="/chats"
-          element={
-            <PrivateRoute>
-              <>
-                <Layout>
-                  <Chats />
-                </Layout>
-              </>
-            </PrivateRoute>
-          }
-        />
-
-        {/* CHAT */}
         <Route
-          path="/chat/:id"
-          element={
-            <PrivateRoute>
-              <>
-                <Layout>
-                  <Chat />
-                </Layout>
-              </>
-            </PrivateRoute>
-          }
-        />
+  path="/chats"
+  element={
+    <PrivateRoute>
+      <Layout>
+        <Chats />
+      </Layout>
+    </PrivateRoute>
+  }
+/>
 
+<Route
+  path="/chat/:id"
+  element={
+    <PrivateRoute>
+      <Layout>
+        <Chat />
+      </Layout>
+    </PrivateRoute>
+  }
+/>
         <Route
           path="/video/:id"
           element={
