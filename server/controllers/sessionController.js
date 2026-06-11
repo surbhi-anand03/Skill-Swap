@@ -174,9 +174,16 @@ exports.getMySessions = async (
         ]
       })
       .populate(
-        "hostUser participantUser",
-        "name email"
-      )
+  "hostUser participantUser",
+  `
+  name
+  email
+  bio
+  profileImage
+  skillsOffered
+  skillsWanted
+  `
+)
       .sort({ createdAt: -1 });
 
     const pending =
