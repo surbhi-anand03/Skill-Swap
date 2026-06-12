@@ -215,7 +215,7 @@ const getOtherUserBio = (session) => {
     <div>
 
       {/* Heading */}
-      <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
+      {/* <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
 
         <div className="bg-violet-100 p-4 rounded-3xl">
           <FaRocket className="text-violet-600 text-2xl" />
@@ -231,7 +231,69 @@ const getOtherUserBio = (session) => {
             partners and grow your skills.
           </p>
         </div>
-      </div>
+      </div> */}
+      {/* Heading */}
+<div className="flex items-start gap-4">
+
+  {/* Mobile/Tablet Profile */}
+  <div className="lg:hidden">
+    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200">
+
+      {profile?.profileImage ? (
+        <img
+          src={profile.profileImage}
+          alt={profile?.name}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full bg-violet-100 flex items-center justify-center">
+          <FaUserCircle className="text-4xl text-violet-600" />
+        </div>
+      )}
+
+    </div>
+  </div>
+
+
+  {/* Laptop Rocket Icon */}
+  <div className="hidden lg:block bg-violet-100 p-4 rounded-3xl">
+    <FaRocket className="text-violet-600 text-2xl" />
+  </div>
+
+
+  <div className="flex-1">
+
+    <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-slate-800">
+      Welcome,
+      <span className="text-violet-600">
+        {" "}{profile?.name || "SkillSwap Member"}!
+      </span>
+    </h1>
+
+
+    {/* Mobile Bio */}
+    <p className="lg:hidden text-slate-600 mt-1">
+      {profile?.bio || "SkillSwap Member"}
+    </p>
+
+
+    {/* Mobile View Profile */}
+    <button
+      onClick={() => navigate("/profile")}
+      className="lg:hidden text-violet-600 font-semibold mt-1"
+    >
+      View Profile →
+    </button>
+
+
+    {/* Description */}
+    {/* <p className="text-slate-500 mt-3 text-sm sm:text-base lg:text-lg">
+      Track your learning journey, connect with partners and grow your skills.
+    </p> */}
+
+  </div>
+
+</div>
 
       {/* QUICK STATS */}
       {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8"> */}
@@ -417,8 +479,19 @@ const getOtherUserBio = (session) => {
 
     {/* RIGHT PROFILE CARD */}
     {/* <div className="bg-gradient-to-br from-white to-slate-50 rounded-[24px] sm:rounded-[28px] border border-slate-200 p-4 sm:p-6 lg:p-7 shadow-md overflow-hidden"> */}
-<div className="min-w-0 w-full bg-gradient-to-br from-white to-slate-50 rounded-[24px] sm:rounded-[28px] border border-slate-200 p-4 sm:p-6 lg:p-7 shadow-md overflow-hidden">
-      <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5">
+    <div
+      className="
+        hidden lg:block
+        min-w-0 w-full
+        bg-gradient-to-br from-white to-slate-50
+        rounded-[24px] sm:rounded-[28px]
+        border border-slate-200
+        p-4 sm:p-6 lg:p-7
+        shadow-md
+        overflow-hidden
+      "
+> 
+     <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5">
 
         <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden border-4 border-slate-200">
 
