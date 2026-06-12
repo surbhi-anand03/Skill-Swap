@@ -22,6 +22,7 @@ import VideoRoom from "./pages/VideoRoom";
 
 import Main from "./main/main";
 
+import Notification from "./pages/Notification";
 
 function App() {
   return (
@@ -160,6 +161,17 @@ function App() {
                   <VideoRoom />
                 </Layout>
               </>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <Notification />
+              </Layout>
             </PrivateRoute>
           }
         />

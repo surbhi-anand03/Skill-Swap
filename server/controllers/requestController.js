@@ -1,7 +1,7 @@
 const Request = require("../models/Request");
 const User = require("../models/User");
 const Match = require("../models/Match");
-
+const Notification = require("../models/Notification");
 // ================= SEND REQUEST =================
 
 exports.sendRequest = async (req, res) => {
@@ -52,6 +52,14 @@ exports.sendRequest = async (req, res) => {
       receiver: receiverId,
       status: "pending",
     });
+
+    await Notification.create({
+      user:receiverId,
+      sender:senderId,
+      type:"request",
+      message:"sent you a swap request"
+    });
+    
 
     res.json({
       msg: "Request sent successfully",
@@ -125,50 +133,6 @@ exports.getPending = async (req, res) => {
   }
 };
 
-// ================= GET SKIPPED =================
-
-// exports.getSkipped = async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-
-//     const requests = await Request.find({
-//       status: "skipped",
-//       $or: [
-//         { sender: userId },
-//         { receiver: userId },
-//       ],
-//     })
-//       .populate(
-//         "sender",
-//         `
-//         name
-//         skills
-//         skillsOffered
-//         skillsWanted
-//         profileImage
-//         `
-//       )
-//       .populate(
-//         "receiver",
-//         `
-//         name
-//         skills
-//         skillsOffered
-//         skillsWanted
-//         profileImage
-//         `
-//       );
-
-//     res.json(requests);
-//   } catch (err) {
-//     console.error("GET SKIPPED ERROR:", err);
-
-//     res.status(500).json({
-//       error: err.message,
-//     });
-//   }
-// };
-
 // ================= RESPOND REQUEST =================
 
 exports.respondRequest = async (req, res) => {
@@ -199,6 +163,13 @@ exports.respondRequest = async (req, res) => {
     if (action === "accepted") {
       request.status = "accepted";
       await request.save();
+
+      await Notification.create({
+        user:request.sender,
+        sender:request.receiver,
+        type:"accepted",
+        message:"accepted your swap request"
+      });
 
       const existingMatch = await Match.findOne({
         users: {
@@ -248,32 +219,3 @@ exports.respondRequest = async (req, res) => {
   }
 };
 
-// ================= GET ALL USERS =================
-
-// exports.getAllUsers = async (
-//   req,
-//   res
-// ) => {
-//   try {
-//     const currentUserId =
-//       req.user?.id;
-
-//     const users =
-//       await User.find({
-//         _id: {
-//           $ne: currentUserId,
-//         },
-//       }).select("-password");
-
-//     res.json(users);
-//   } catch (err) {
-//     console.error(
-//       "GET USERS ERROR:",
-//       err
-//     );
-
-//     res.status(500).json({
-//       error: err.message,
-//     });
-//   }
-// };
