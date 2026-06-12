@@ -4,7 +4,7 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   FaUserCircle,
@@ -20,6 +20,8 @@ import {
   FaBell
 } from "react-icons/fa";
 
+import { getNotifications } from "../api/api";
+
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,7 +33,7 @@ export default function Navbar() {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
 
-    navigate("/");
+    navigate("/login");
   };
 
   const menuItems = [
@@ -106,6 +108,44 @@ export default function Navbar() {
     </Link>
   );
 
+  const [notificationCount, setNotificationCount] =
+    useState(0);
+
+    useEffect(() => {
+
+      loadNotifications();
+
+      const interval = setInterval(() => {
+
+        loadNotifications();
+
+      }, 5000);
+
+      return () => clearInterval(interval);
+
+    }, []);
+
+    const loadNotifications = async () => {
+
+      try {
+
+        const data =
+          await getNotifications();
+
+        setNotificationCount(
+          data.length
+        );
+
+      }
+
+      catch (err) {
+
+        console.log(err);
+
+      }
+
+    };
+
   return (
     <>
       {/* ================= MOBILE HEADER ================= */}
@@ -113,26 +153,86 @@ export default function Navbar() {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 shadow-sm">
 
         <h1
-          onClick={() =>
-            navigate("/home")
-          }
-          className="text-2xl font-black text-violet-600 cursor-pointer"
-        >
-          SkillSwap
-        </h1>
+        onClick={() => navigate("/home")}
+        className="text-2xl font-black text-violet-600 cursor-pointer"
+      >
+        SkillSwap
+      </h1>
 
-        <button
-          onClick={() =>
-            setOpen(!open)
-          }
-          className="w-11 h-11 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center"
-        >
-          {open ? (
-            <FaTimes size={20} />
-          ) : (
-            <FaBars size={20} />
-          )}
-        </button>
+      <div className="flex items-center gap-3">
+
+        {/* Notification Bell */}
+
+        <Link
+        to="/notifications"
+        className="
+        relative
+        w-11
+        h-11
+        rounded-xl
+        bg-violet-100
+        text-violet-600
+        flex
+        items-center
+        justify-center
+        "
+      >
+        <FaBell size={18} />
+
+        {
+          notificationCount > 0 && (
+            <span
+              className="
+              absolute
+              -top-1
+              -right-1
+              min-w-[20px]
+              h-5
+              px-1
+              rounded-full
+              bg-green-600
+              text-white
+              text-[11px]
+              font-bold
+              flex
+              items-center
+              justify-center
+              "
+            >
+              {
+                notificationCount > 99
+                  ? "99+"
+                  : notificationCount
+              }
+            </span>
+          )
+        }
+
+</Link>
+
+  {/* Menu Button */}
+
+  <button
+    onClick={() => setOpen(!open)}
+    className="
+    w-11
+    h-11
+    rounded-xl
+    bg-violet-100
+    text-violet-600
+    flex
+    items-center
+    justify-center
+    "
+  >
+    {open ? (
+      <FaTimes size={20} />
+    ) : (
+      <FaBars size={20} />
+    )}
+  </button>
+
+</div>
       </div>
 
       {/* ================= MOBILE DRAWER ================= */}
