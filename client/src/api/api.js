@@ -67,7 +67,12 @@ export const getSkippedRequests = () =>
 export const respondRequest = (requestId, action) =>
   API.post("/request/respond", { requestId, action });
 
-
+export const markNotificationRead =
+(id) =>
+  API.patch(
+    `/notification/${id}/read`
+  );
+  
 export const getAllRequests = async () => {
   const [incoming, pending] = await Promise.all([
     API.get("/request/incoming"),
@@ -84,6 +89,23 @@ export const getAllRequests = async () => {
       ),
     },
   };
+};
+
+export const getNotifications = async () => {
+
+  const token =
+    localStorage.getItem("token");
+
+  const res = await axios.get(
+    "http://localhost:5000/api/notification",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  return res.data;
 };
 
 

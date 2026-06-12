@@ -17,6 +17,7 @@ import {
   FaExchangeAlt,
   FaBars,
   FaTimes,
+  FaBell
 } from "react-icons/fa";
 
 export default function Navbar() {
@@ -67,6 +68,11 @@ export default function Navbar() {
         <FaComments size={20} />
       ),
       label: "Chats",
+    },
+    {
+      path: "/notifications",
+      icon: <FaBell size={20} />,
+      label: "Notifications",
     },
     {
       path: "/profile",

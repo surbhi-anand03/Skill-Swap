@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 
 const Message = require("../models/Message");
+const Notification = require("../models/Notification");
+
 const auth = require("../middleware/authMiddleware");
 
 
@@ -18,6 +20,20 @@ router.post("/send", auth, async (req, res) => {
       receiver,
       text,
     });
+
+    await Notification.create({
+
+      user: receiver,
+
+      sender: sender,
+
+      type: "chat",
+
+      message: "sent you a message"
+
+    });
+
+    res.json(message);
 
     res.json(message);
   } catch (err) {

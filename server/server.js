@@ -17,6 +17,8 @@ const matchRoutes = require("./routes/match");
 const sessionRoutes = require("./routes/session");
 const chatRoutes = require("./routes/chat");
 
+const notificationRoutes = require("./routes/notification");
+
 connectDB();
 
 const app = express();
@@ -35,6 +37,7 @@ app.use("/api/request", requestRoutes);
 app.use("/api/match", matchRoutes);
 app.use("/api/session", sessionRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/notification",notificationRoutes);
 
 // ================= HOME =================
 app.get("/", (req, res) => {

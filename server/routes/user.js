@@ -79,13 +79,15 @@ router.get(
           userId
         );
 
-      const requests =
-        await Request.find({
-          $or: [
-            { sender: userId },
-            { receiver: userId },
-          ],
-        });
+      const requests = await Request.find({
+        status: {
+          $in: ["pending", "accepted"],
+        },
+        $or: [
+          { sender: userId },
+          { receiver: userId },
+        ],
+      });
 
       const relatedUserIds =
         new Set();
