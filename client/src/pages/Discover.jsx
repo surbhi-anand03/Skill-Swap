@@ -82,45 +82,85 @@ const Discover = () => {
 
       {/* ================= RECOMMENDED USERS ================= */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-5 mt-8 sm:mt-10 lg:mt-12">
+{/* HEADER */}
+<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 
-        {/* HEADER */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+  {/* LEFT SIDE */}
+  <div className="flex items-start gap-3">
+    <Sparkles 
+      className="
+        text-violet-600 
+        w-7 h-7 
+        sm:w-8 sm:h-8 
+        shrink-0
+        mt-1
+      " 
+    />
 
-          <div className="flex items-start sm:items-center gap-4">
-            <Sparkles
-              size={36}
-              className="text-violet-600 shrink-0"
-            />
+    <div>
+      {/* Title + mobile count */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <h2
+          className="
+            text-2xl
+            sm:text-3xl
+            lg:text-4xl
+            font-bold
+            text-slate-900
+          "
+        >
+          Recommended Users
+        </h2>
 
-            <div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">
-                Recommended For You
-              </h2>
-
-              <p className="text-gray-600 text-sm sm:text-base mt-1">
-                People you might connect
-                and grow with
-              </p>
-            </div>
-          </div>
-
-          <div
-            className="
-              flex items-center justify-center
-              gap-2
-              bg-violet-100
-              text-violet-700
-              border border-violet-300
-              px-5 py-3
-              rounded-full
-              font-semibold
-              w-fit
-            "
-          >
-            <Users size={18} />
-            {recommended.length} Users
-          </div>
+        {/* Show only on mobile */}
+        <div
+          className="
+            flex md:hidden
+            items-center
+            gap-1.5
+            bg-violet-100
+            text-violet-700
+            border border-violet-300
+            px-3 py-1
+            rounded-full
+            text-sm
+            font-semibold
+          "
+        >
+          <Users className="w-4 h-4" />
+          {recommended.length}
         </div>
+      </div>
+
+      <p className="text-gray-600 text-sm sm:text-base mt-1">
+        People you might connect and grow with
+      </p>
+    </div>
+  </div>
+
+
+  {/* Show only tablet & laptop */}
+  <div
+    className="
+      hidden md:flex
+      items-center
+      justify-center
+      gap-2
+      bg-violet-100
+      text-violet-700
+      border border-violet-300
+      px-4 py-2
+      rounded-full
+      text-sm sm:text-base
+      font-semibold
+      w-fit
+    "
+  >
+    <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+    {recommended.length} Users
+  </div>
+
+</div>
 
         {/* EMPTY STATE */}
         {recommended.length ===
