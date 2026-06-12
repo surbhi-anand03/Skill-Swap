@@ -10,6 +10,8 @@ import {
   FaSearch,
   FaEllipsisV,
   FaCircle,
+   FaCheck,
+  FaCheckDouble,
 } from "react-icons/fa";
 
 
@@ -32,6 +34,12 @@ export default function Chat() {
   
 
   const currentUser = localStorage.getItem("userId");
+
+const [isTyping, setIsTyping] =
+  useState(false);
+
+const typingTimeout =
+  useRef(null);
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -72,6 +80,30 @@ useEffect(() => {
   }
 }, [selectedChatId]);
 
+
+useEffect(() => {
+  messages.forEach((msg) => {
+
+    if (
+      msg.sender ===
+      selectedChatId &&
+      !msg.seen
+    ) {
+
+      socket.emit(
+        "messageSeen",
+        {
+          messageId: msg._id,
+          sender: msg.sender,
+        }
+      );
+    }
+  });
+}, [messages]);
+
+
+
+
   // ================= AUTO SCROLL =================
   useEffect(() => {
 
@@ -99,6 +131,25 @@ useEffect(() => {
       }
 
     };
+
+socket.on("typing", () => {
+  setIsTyping(true);
+});
+
+socket.on("stopTyping", () => {
+  setIsTyping(false);
+});
+
+socket.on("messageSeen", ({ messageId }) => {
+  setMessages((prev) =>
+    prev.map((msg) =>
+      msg._id === messageId
+        ? { ...msg, seen: true }
+        : msg
+    )
+  );
+});
+    
 
 const handleOnlineUsers = (users) => {
 
@@ -130,6 +181,10 @@ const handleOnlineUsers = (users) => {
         "getOnlineUsers",
         handleOnlineUsers
       );
+
+      socket.off("typing");
+socket.off("stopTyping");
+socket.off("messageSeen");
 
     };
 
@@ -191,6 +246,13 @@ socket.emit(
 
 setMessage("");
 
+socket.emit("stopTyping", {
+  sender: currentUser,
+  receiver: selectedChatId,
+});
+
+setIsTyping(false);
+
 loadConversations();
     } catch (err) {
 
@@ -216,6 +278,33 @@ const isOnline = onlineUsers.some(
   (user) =>
     String(user.userId) === String(selectedChatId)
 );
+
+const formatDateLabel = (date) => {
+  const msgDate = new Date(date);
+
+  const today = new Date();
+
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (msgDate.toDateString() === today.toDateString()) {
+    return "Today";
+  }
+
+  if (
+    msgDate.toDateString() ===
+    yesterday.toDateString()
+  ) {
+    return "Yesterday";
+  }
+
+  return msgDate.toLocaleDateString([], {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
 
   return (
 
@@ -392,9 +481,11 @@ const isOnline = onlineUsers.some(
 
                 <span className="text-sm text-gray-500">
 
-                  {isOnline
-                    ? "Online"
-                    : "Offline"}
+                   {isTyping
+   ? "Typing..."
+   : isOnline
+   ? "Online"
+   : "Offline"}
 
                 </span>
 
@@ -419,16 +510,43 @@ const isOnline = onlineUsers.some(
 
         <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-gray-100">
 
-          {messages.map((msg, index) => (
+          {messages.map((msg, index) => {
+          
+         
 
-            <div
-              key={msg._id || index}
-              className={`flex ${
-                msg.sender === currentUser
-                  ? "justify-end"
-                  : "justify-start"
-              }`}
-            >
+          const currentDate = new Date(
+            msg.createdAt
+              ).toDateString();
+
+              const previousDate =
+             index > 0
+      ? new Date(
+          messages[index - 1].createdAt
+        ).toDateString()
+      : null;
+
+const showDate =
+  currentDate !== previousDate;
+
+return (
+
+<div key={msg._id || `${msg.createdAt}-${index}`}>
+  
+  {showDate && (
+    <div className="flex justify-center my-4">
+      <span className="bg-white px-4 py-1 rounded-full text-xs text-gray-500 shadow">
+        {formatDateLabel(msg.createdAt)}
+      </span>
+    </div>
+  )}
+
+  <div
+    className={`flex ${
+      msg.sender === currentUser
+        ? "justify-end"
+        : "justify-start"
+    }`}
+  >
 
               <div
                 className={`max-w-[70%] px-5 py-3 rounded-3xl shadow-sm ${
@@ -441,35 +559,38 @@ const isOnline = onlineUsers.some(
                 <p className="text-[15px] break-words">
                   {msg.text}
                 </p>
+<div className="flex items-center justify-end gap-1 mt-2">
+  <span
+    className={`text-xs ${
+      msg.sender === currentUser
+        ? "text-indigo-100"
+        : "text-gray-400"
+    }`}
+  >
+    {msg.createdAt
+      ? new Date(msg.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : ""}
+  </span>
 
-                <p
-                  className={`text-xs mt-2 ${
-                    msg.sender === currentUser
-                      ? "text-indigo-100"
-                      : "text-gray-400"
-                  }`}
-                >
-
-                  {msg.createdAt
-                    ? new Date(
-                        msg.createdAt
-                      ).toLocaleTimeString(
-                        [],
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )
-                    : ""}
-
-                </p>
+  {msg.sender === currentUser && (
+    msg.seen ? (
+      <FaCheckDouble className="text-xs text-blue-300" />
+    ) : (
+      <FaCheck className="text-xs text-indigo-100" />
+    )
+  )}
+</div>
 
               </div>
 
             </div>
+</div>
 
-          ))}
-
+);
+})}
           <div ref={bottomRef}></div>
 
         </div>
@@ -484,9 +605,29 @@ const isOnline = onlineUsers.some(
               type="text"
               placeholder="Type a message..."
               value={message}
-              onChange={(e) =>
-                setMessage(e.target.value)
-              }
+             onChange={(e) => {
+  setMessage(e.target.value);
+
+  socket.emit("typing", {
+    sender: currentUser,
+    receiver: selectedChatId,
+  });
+
+  clearTimeout(
+    typingTimeout.current
+  );
+
+  typingTimeout.current =
+    setTimeout(() => {
+      socket.emit(
+        "stopTyping",
+        {
+          sender: currentUser,
+          receiver: selectedChatId,
+        }
+      );
+    }, 1000);
+}}
               onKeyDown={handleKeyPress}
               className="flex-1 bg-transparent outline-none text-lg"
             />

@@ -10,7 +10,7 @@ const { Server } = require("socket.io");
 require("./cron/sessionCron");
 
 const connectDB = require("./config/db");
-
+const Message = require("./models/Message");
 const initializeSessionSocket = require("./sockets/sessionSocket");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");const requestRoutes = require("./routes/request");
@@ -92,61 +92,85 @@ const getUser = (userId) => {
 
 // ================= SOCKET CONNECTION =================
 io.on("connection", (socket) => {
-  console.log(
-    "User connected:",
-    socket.id
-  );
 
-  // ================= JOIN =================
   socket.on("join", (userId) => {
     addUser(userId, socket.id);
 
-    console.log(
-      "Online Users:",
-      onlineUsers
-    );
-
-    // SEND ONLINE USERS TO EVERYONE
     io.emit(
       "getOnlineUsers",
       onlineUsers
     );
   });
 
-  // ================= SEND MESSAGE =================
+  socket.on("sendMessage", (data) => {
+    const user = getUser(
+      data.receiver
+    );
+
+    if (user) {
+      io.to(user.socketId).emit(
+        "receiveMessage",
+        data
+      );
+    }
+  });
+
+  socket.on("typing", ({ sender, receiver }) => {
+    const receiverUser =
+      getUser(receiver);
+
+    if (receiverUser) {
+      io.to(receiverUser.socketId)
+        .emit("typing");
+    }
+  });
+
+  socket.on("stopTyping", ({ sender, receiver }) => {
+    const receiverUser =
+      getUser(receiver);
+
+    if (receiverUser) {
+      io.to(receiverUser.socketId)
+        .emit("stopTyping");
+    }
+  });
+
   socket.on(
-    "sendMessage",
-    (data) => {
-      const user = getUser(
-        data.receiver
+    "messageSeen",
+    async ({ messageId, sender }) => {
+
+      await Message.findByIdAndUpdate(
+        messageId,
+        { seen: true }
       );
 
-      if (user) {
-        io.to(user.socketId).emit(
-          "receiveMessage",
-          data
-        );
+      const senderUser =
+        getUser(sender);
+
+      if (senderUser) {
+        io.to(senderUser.socketId)
+          .emit(
+            "messageSeen",
+            { messageId }
+          );
       }
     }
   );
 
-  // ================= DISCONNECT =================
   socket.on("disconnect", () => {
-    console.log(
-      "User disconnected:",
-      socket.id
-    );
-
     removeUser(socket.id);
 
-    // UPDATE ONLINE USERS
     io.emit(
       "getOnlineUsers",
       onlineUsers
     );
+
+    console.log(
+      "Socket disconnected:",
+      socket.id
+    );
   });
 });
-
 // ================= SESSION SOCKET =================
 initializeSessionSocket(io);
 

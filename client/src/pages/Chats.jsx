@@ -43,6 +43,8 @@ export default function Chats() {
         setConversations(
           res.data
         );
+
+        console.log("CONVERSATIONS:", res.data);
       } catch (err) {
         console.log(err);
       }
@@ -83,6 +85,42 @@ export default function Chats() {
             search.toLowerCase()
           )
     );
+
+
+const formatChatTime = (date) => {
+  if (!date) return "";
+
+  const msgDate = new Date(date);
+  const today = new Date();
+
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (msgDate.toDateString() === today.toDateString()) {
+    return msgDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  if (msgDate.toDateString() === yesterday.toDateString()) {
+    return "Yesterday";
+  }
+
+  const diffDays = Math.floor(
+    (today - msgDate) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDays < 7) {
+    return msgDate.toLocaleDateString([], {
+      weekday: "short",
+    });
+  }
+
+  return msgDate.toLocaleDateString();
+};
+
+
 
   return (
     <div className="h-screen bg-[#f4f5f7] flex overflow-hidden">
@@ -128,6 +166,7 @@ export default function Chats() {
           ) : (
             filteredChats.map(
               (chat) => {
+                console.log("CHAT:", chat);
                 const userId =
                   chat.user._id;
 
@@ -179,21 +218,9 @@ export default function Chats() {
                             }
                           </h3>
 
-                          <span className="text-xs text-gray-400">
-                            {chat.updatedAt
-                              ? new Date(
-                                  chat.updatedAt
-                                ).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour:
-                                      "2-digit",
-                                    minute:
-                                      "2-digit",
-                                  }
-                                )
-                              : ""}
-                          </span>
+                         <span className="text-xs text-gray-400">
+  {formatChatTime(chat.updatedAt)}
+</span>
                         </div>
 
                         <p className="text-sm text-gray-500 truncate mt-1">
