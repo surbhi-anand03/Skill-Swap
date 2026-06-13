@@ -451,147 +451,265 @@ export default function VideoRoom() {
   };
 
   return (
-    <div className="min-h-screen bg-[#eef2ff] flex items-center justify-center p-4">
-      <div className="w-full max-w-7xl h-[95vh] bg-white rounded-[32px] shadow-2xl overflow-hidden border border-gray-200 flex flex-col">
+  <div className="min-h-screen bg-[#eef2ff] p-2 sm:p-4 flex items-center justify-center">
+    <div
+      className="
+        w-full
+        h-[100dvh]
+        sm:h-[96vh]
+        max-w-7xl
+        bg-white
+        rounded-none
+        sm:rounded-[32px]
+        shadow-2xl
+        overflow-hidden
+        border border-gray-200
+        flex flex-col
+      "
+    >
+      {/* HEADER */}
+      <div
+        className="
+          border-b border-gray-200
+          px-4 sm:px-6 lg:px-8
+          py-4
+          bg-white
+          flex
+          flex-col
+          sm:flex-row
+          sm:items-center
+          justify-between
+          gap-4
+        "
+      >
+        {/* LEFT */}
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-black text-indigo-600 shrink-0">
+            SkillSwap
+          </h1>
 
-        {/* HEADER */}
-        <div className="h-[76px] border-b border-gray-200 px-8 flex items-center justify-between bg-white">
+          <div className="hidden sm:block w-[1px] h-9 bg-gray-300" />
 
-          {/* LEFT */}
-          <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-black text-indigo-600">
-              SkillSwap
-            </h1>
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
+              Live Session
+            </h2>
 
-            <div className="w-[1px] h-9 bg-gray-300" />
-
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">
-                Live Session
-              </h2>
-
-              <p className="text-sm text-gray-500">
-                Video Meeting Active
-              </p>
-            </div>
-          </div>
-
-          {/* TIMER */}
-          <div className="flex items-center gap-2 bg-indigo-50 px-5 py-2 rounded-xl border border-indigo-100 text-indigo-700 font-semibold shadow-sm">
-            <Clock3 size={18} />
-            {formatTime(seconds)}
+            <p className="text-xs sm:text-sm text-gray-500 truncate">
+              Video Meeting Active
+            </p>
           </div>
         </div>
 
-        {/* VIDEO AREA */}
-        <div className="flex-1 p-5 bg-[#f8faff] relative overflow-hidden">
+        {/* TIMER */}
+        <div
+          className="
+            self-start sm:self-auto
+            flex items-center gap-2
+            bg-indigo-50
+            px-4 py-2
+            rounded-xl
+            border border-indigo-100
+            text-indigo-700
+            font-semibold
+            text-sm sm:text-base
+            shadow-sm
+          "
+        >
+          <Clock3 size={18} />
+          {formatTime(seconds)}
+        </div>
+      </div>
 
+      {/* VIDEO AREA */}
+      <div className="flex-1 p-2 sm:p-4 lg:p-5 bg-[#f8faff] relative overflow-hidden">
+        <div className="w-full h-full bg-black rounded-[20px] sm:rounded-[28px] overflow-hidden relative">
+          
           {/* REMOTE VIDEO */}
-          <div className="w-full h-full bg-black rounded-[28px] overflow-hidden relative">
+          <div
+            id="remote-video-player"
+            className="w-full h-full"
+          />
 
+          {/* WAITING SCREEN */}
+          <div
+            id="waiting-screen"
+            className="absolute inset-0 flex items-center justify-center flex-col text-white z-20 px-4 text-center"
+            style={{
+              display: remoteJoined
+                ? "none"
+                : "flex",
+            }}
+          >
             <div
-              id="remote-video-player"
+              className="
+                w-16 h-16 sm:w-24 sm:h-24
+                rounded-full
+                bg-white/10
+                flex items-center justify-center
+                text-2xl sm:text-4xl
+                font-bold
+                mb-4
+              "
+            >
+              P
+            </div>
+
+            <h2 className="text-xl sm:text-3xl font-semibold mb-2">
+              Waiting for Participant
+            </h2>
+
+            <p className="text-sm sm:text-lg text-gray-300">
+              User will join soon...
+            </p>
+          </div>
+
+          {/* LOCAL VIDEO */}
+          <div
+            className="
+              absolute
+              bottom-3 right-3
+              sm:bottom-5 sm:right-5
+              w-[110px]
+              h-[150px]
+              xs:w-[130px]
+              xs:h-[170px]
+              sm:w-[180px]
+              sm:h-[120px]
+              md:w-[220px]
+              md:h-[140px]
+              lg:w-[260px]
+              lg:h-[160px]
+              bg-black
+              rounded-2xl
+              overflow-hidden
+              border-2 sm:border-[3px]
+              border-white
+              shadow-2xl
+              z-30
+            "
+          >
+            <div
+              id="local-video-player"
               className="w-full h-full"
             />
-
-            {/* WAITING SCREEN */}
-            <div
-              id="waiting-screen"
-              className="absolute inset-0 flex items-center justify-center flex-col text-white z-20"
-              style={{
-                display: remoteJoined
-                  ? "none"
-                  : "flex",
-              }}
-            >
-              <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-4xl font-bold mb-4">
-                P
-              </div>
-
-              <h2 className="text-3xl font-semibold mb-2">
-                Waiting for Participant
-              </h2>
-
-              <p className="text-gray-300 text-lg">
-                User will join soon...
-              </p>
-            </div>
-
-            {/* LOCAL VIDEO */}
-            <div className="absolute bottom-5 right-5 w-[240px] h-[150px] bg-black rounded-2xl overflow-hidden border-[3px] border-white shadow-2xl z-30">
-              <div
-                id="local-video-player"
-                className="w-full h-full"
-              />
-            </div>
           </div>
-
-          {/* PARTICIPANT LEFT */}
-          {participantLeft && (
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-xl shadow-xl z-50 font-semibold">
-              Participant Left Meeting
-            </div>
-          )}
         </div>
 
-        {/* CONTROLS */}
-        <div className="h-[90px] bg-white border-t border-gray-200 flex items-center justify-center">
-          <div className="bg-[#f8f9fc] border border-gray-200 rounded-full px-8 py-3 flex items-center gap-5 shadow-md">
-
-            {/* MIC */}
-            <button
-              onClick={toggleMute}
-              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 ${
-                muted
-                  ? "bg-red-100 text-red-500"
-                  : "bg-white text-gray-700"
-              }`}
-            >
-              {muted ? (
-                <MicOff size={24} />
-              ) : (
-                <Mic size={24} />
-              )}
-            </button>
-
-            {/* CAMERA */}
-            <button
-              onClick={toggleCamera}
-              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 ${
-                cameraOff
-                  ? "bg-red-100 text-red-500"
-                  : "bg-white text-gray-700"
-              }`}
-            >
-              {cameraOff ? (
-                <VideoOff size={24} />
-              ) : (
-                <Video size={24} />
-              )}
-            </button>
-
-            {/* SCREEN SHARE */}
-            <button
-              onClick={shareScreen}
-              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 ${
-                screenSharing
-                  ? "bg-green-100 text-green-600"
-                  : "bg-white text-gray-700"
-              }`}
-            >
-              <MonitorUp size={24} />
-            </button>
-
-            {/* END CALL */}
-            <button
-              onClick={leaveCall}
-              className="w-14 h-14 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-all duration-200"
-            >
-              <PhoneOff size={24} />
-            </button>
+        {/* PARTICIPANT LEFT */}
+        {participantLeft && (
+          <div
+            className="
+              absolute
+              top-4
+              left-1/2
+              -translate-x-1/2
+              bg-red-500
+              text-white
+              px-4 sm:px-6
+              py-2 sm:py-3
+              rounded-xl
+              shadow-xl
+              z-50
+              font-semibold
+              text-sm sm:text-base
+              text-center
+              max-w-[90%]
+            "
+          >
+            Participant Left Meeting
           </div>
+        )}
+      </div>
+
+      {/* CONTROLS */}
+      <div
+        className="
+          bg-white
+          border-t border-gray-200
+          px-2 sm:px-4
+          py-4
+          flex justify-center
+        "
+      >
+        <div
+          className="
+            bg-[#f8f9fc]
+            border border-gray-200
+            rounded-full
+            px-3 sm:px-6
+            py-2 sm:py-3
+            flex items-center
+            gap-2 sm:gap-4 lg:gap-5
+            shadow-md
+            overflow-x-auto
+            max-w-full
+          "
+        >
+          {/* MIC */}
+          <button
+            onClick={toggleMute}
+            className={`w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-200 ${
+              muted
+                ? "bg-red-100 text-red-500"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            {muted ? (
+              <MicOff size={20} />
+            ) : (
+              <Mic size={20} />
+            )}
+          </button>
+
+          {/* CAMERA */}
+          <button
+            onClick={toggleCamera}
+            className={`w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-200 ${
+              cameraOff
+                ? "bg-red-100 text-red-500"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            {cameraOff ? (
+              <VideoOff size={20} />
+            ) : (
+              <Video size={20} />
+            )}
+          </button>
+
+          {/* SCREEN SHARE */}
+          <button
+            onClick={shareScreen}
+            className={`w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-200 ${
+              screenSharing
+                ? "bg-green-100 text-green-600"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            <MonitorUp size={20} />
+          </button>
+
+          {/* END CALL */}
+          <button
+            onClick={leaveCall}
+            className="
+              w-11 h-11
+              sm:w-14 sm:h-14
+              rounded-full
+              bg-red-500
+              hover:bg-red-600
+              text-white
+              flex items-center
+              justify-center
+              transition-all duration-200
+            "
+          >
+            <PhoneOff size={20} />
+          </button>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

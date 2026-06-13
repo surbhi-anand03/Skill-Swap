@@ -100,7 +100,7 @@ const features = [
 
           <div className="flex gap-3">
             <a
-              href="/"
+              href="/login"
               className="border px-5 py-2 rounded-lg"
             >
               Log In

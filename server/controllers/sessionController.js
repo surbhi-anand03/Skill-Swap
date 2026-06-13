@@ -3,41 +3,9 @@ const Session = require("../models/Session");
 
 /* ================= CREATE SESSION ================= */
 
-const generateRoomId = require(
-  "../utils/generateRoomId"
-);
+const generateRoomId = require( "../utils/generateRoomId");
 
-// exports.createSession = async (req, res) => {
-//   try {
-//     const hostUser = req.user.id;
-
-//     const {
-//       participantUser,
-//       sessionType,
-//       skill,
-//       startTime,
-//     } = req.body;
-
-//     const roomId = generateRoomId();
-
-//     const session = await Session.create({
-//       hostUser,
-//       participantUser,
-//       skill,
-//       sessionType,
-//       startTime,
-//       meetingRoomId: roomId,
-//       status: "pending",   // always pending first
-//     });
-
-//     res.json(session);
-
-//   } catch (err) {
-//     res.status(500).json({
-//       error: err.message,
-//     });
-//   }
-// };
+const Notification =require("../models/Notification");
 
 exports.createSession = async (req, res) => {
   try {
@@ -69,6 +37,13 @@ exports.createSession = async (req, res) => {
       meetingProvider: "agora",
       meetingRoomId: roomId,
       status: "pending"
+    });
+
+    await Notification.create({
+      user:participantUser,
+      sender:hostUser,
+      type:"session",
+      message:"sent a session request"
     });
 
     res.json(session);
@@ -111,6 +86,13 @@ exports.acceptSession = async (req, res) => {
 
     await session.save();
 
+    await Notification.create({
+      user:session.hostUser,
+      sender:session.participantUser,
+      type:"sessionAccepted",
+      message:"accepted your session"
+    });
+
     res.json(session);
 
   } catch (err) {
@@ -141,6 +123,13 @@ exports.rejectSession = async (req, res) => {
         message: "Only participant can reject",
       });
     }
+
+    await Notification.create({
+      user: session.hostUser,
+      sender: session.participantUser,
+      type: "sessionRejected",
+      message: "rejected your session"
+    });
 
     await Session.findByIdAndDelete(
       req.params.id

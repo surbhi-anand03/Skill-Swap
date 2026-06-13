@@ -195,40 +195,111 @@ const getOtherUserBio = (session) => {
 
   return (
 
-  <div className="min-h-screen bg-slate-50 p-8">
-
-  {/* HERO */}
-{/* HERO SECTION */}
-<div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-200">
-
-  <div className="grid lg:grid-cols-[1.5fr_420px] gap-8 items-start">
-
+<div className="w-full min-h-screen bg-slate-50 pt-0 lg:pt-6 pb-24 lg:pb-6 px-3 sm:px-4 md:px-5 lg:px-6 overflow-hidden">
+<div className="bg-white rounded-[24px] lg:rounded-[32px] p-5 sm:p-6 lg:p-8 shadow-sm border border-slate-200">
+  {/* <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_420px] gap-5 lg:gap-8 items-start"> */}
+    <div
+      className="
+        grid
+        grid-cols-1
+        lg:grid-cols-[minmax(0,1fr)_320px]
+        xl:grid-cols-[minmax(0,1.3fr)_340px]
+        2xl:grid-cols-[minmax(0,1.4fr)_360px]
+        gap-6
+        lg:gap-8
+        items-start
+        w-full
+      "
+    >
     {/* LEFT SIDE */}
     <div>
 
       {/* Heading */}
-      <div className="flex items-center gap-4">
+      {/* <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
 
         <div className="bg-violet-100 p-4 rounded-3xl">
           <FaRocket className="text-violet-600 text-2xl" />
         </div>
 
         <div>
-          <h1 className="text-5xl font-bold text-slate-800">
+          <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-800 leading-tight break-words">
             Welcome, <span className="text-violet-600">{profile?.name || "SkillSwap Member"}</span>
           </h1>
 
-          <p className="text-slate-500 mt-2 text-lg">
+          <p className="text-slate-500 mt-2 text-sm sm:text-base lg:text-lg">
             Track your learning journey, connect with
             partners and grow your skills.
           </p>
         </div>
-      </div>
+      </div> */}
+      {/* Heading */}
+<div className="flex items-start gap-4">
+
+  {/* Mobile/Tablet Profile */}
+  <div className="lg:hidden">
+    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200">
+
+      {profile?.profileImage ? (
+        <img
+          src={profile.profileImage}
+          alt={profile?.name}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full bg-violet-100 flex items-center justify-center">
+          <FaUserCircle className="text-4xl text-violet-600" />
+        </div>
+      )}
+
+    </div>
+  </div>
+
+
+  {/* Laptop Rocket Icon */}
+  <div className="hidden lg:block bg-violet-100 p-4 rounded-3xl">
+    <FaRocket className="text-violet-600 text-2xl" />
+  </div>
+
+
+  <div className="flex-1">
+
+    <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-slate-800">
+      Welcome,
+      <span className="text-violet-600">
+        {" "}{profile?.name || "SkillSwap Member"}!
+      </span>
+    </h1>
+
+
+    {/* Mobile Bio */}
+    <p className="lg:hidden text-slate-600 mt-1">
+      {profile?.bio || "SkillSwap Member"}
+    </p>
+
+
+    {/* Mobile View Profile */}
+    <button
+      onClick={() => navigate("/profile")}
+      className="lg:hidden text-violet-600 font-semibold mt-1"
+    >
+      View Profile →
+    </button>
+
+
+    {/* Description */}
+    {/* <p className="text-slate-500 mt-3 text-sm sm:text-base lg:text-lg">
+      Track your learning journey, connect with partners and grow your skills.
+    </p> */}
+
+  </div>
+
+</div>
 
       {/* QUICK STATS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+      {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8"> */}
+      <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mt-8">
 
-        <div onClick={() => navigate("/profile")} className="bg-violet-50 rounded-3xl p-5 border border-violet-100 hover:bg-violet-100 cursor-pointer transition">
+        <div onClick={() => navigate("/profile")} className="bg-violet-50 rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-violet-100 hover:bg-violet-100 cursor-pointer transition">
           <FaBook className="text-violet-600 text-2xl mb-3" />
 
           <h2 className="text-3xl font-bold">
@@ -240,7 +311,7 @@ const getOtherUserBio = (session) => {
           </p>
         </div>
 
-        <div  onClick={() => navigate("/profile")} className="bg-green-50 rounded-3xl p-5 border border-green-100 hover:bg-green-100 cursor-pointer transition">
+        <div  onClick={() => navigate("/profile")} className="bg-green-50 rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-green-100 hover:bg-green-100 cursor-pointer transition">
           <FaUserGraduate className="text-green-600 text-2xl mb-3" />
 
           <h2 className="text-3xl font-bold">
@@ -252,7 +323,7 @@ const getOtherUserBio = (session) => {
           </p>
         </div>
 
-        <div onClick={() => navigate("/matches")} className="bg-blue-50 rounded-3xl p-5 border border-blue-100 hover:bg-blue-100 cursor-pointer transition">
+        <div onClick={() => navigate("/matches")} className="bg-blue-50 rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-blue-100 hover:bg-blue-100 cursor-pointer transition">
           <FaHandshake className="text-blue-600 text-2xl mb-3" />
 
           <h2 className="text-3xl font-bold">
@@ -264,10 +335,10 @@ const getOtherUserBio = (session) => {
           </p>
         </div>
 
-        <div  onClick={() => navigate("/sessions")} className="bg-orange-50 rounded-3xl p-5 border border-orange-100 hover:bg-orange-100 cursor-pointer transition">
+        <div  onClick={() => navigate("/sessions")} className="bg-orange-50 rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-orange-100 hover:bg-orange-100 cursor-pointer transition">
           <FaCalendarAlt className="text-orange-600 text-2xl mb-3" />
 
-          <h2 className="text-3xl font-bold">
+          <h2 className="text-2xl sm:text-3xl font-bold">
             {sessions.length}
           </h2>
 
@@ -279,11 +350,12 @@ const getOtherUserBio = (session) => {
       </div>
 
       {/* PROFILE STATUS */}
-      <div className="mt-8 bg-slate-50 border border-slate-200 rounded-3xl p-5">
+      <div className="mt-8 bg-slate-50 border border-slate-200 rounded-3xl p-4 sm:p-5">
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
 
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3"> */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
             {profileCompletion === 100 ? (
               <FaCheckCircle className="text-green-500 text-xl" />
             ) : (
@@ -299,7 +371,7 @@ const getOtherUserBio = (session) => {
 
           <span
             className={`
-              px-3 py-1 rounded-full text-sm font-semibold
+              self-start sm:self-auto px-3 py-1 rounded-full text-xs sm:text-sm font-semibold
               ${
                 profileCompletion === 100
                   ? "bg-green-100 text-green-700"
@@ -341,28 +413,28 @@ const getOtherUserBio = (session) => {
               your profile visibility.
             </p>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
 
               {!profile?.name && (
-                <span className="bg-white text-violet-700 border border-violet-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="bg-white text-violet-700 border border-violet-700 px-3 py-2 rounded-full text-xs sm:text-sm font-medium">
                   Add Name
                 </span>
               )}
 
               {!profile?.bio && (
-                <span className="bg-white text-orange-700 border border-orange-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="bg-white text-orange-700 border border-orange-700 px-3 py-2 rounded-full text-xs sm:text-sm font-medium">
                   Add Bio
                 </span>
               )}
 
               {!profile?.skillsOffered?.length && (
-                <span className="bg-white text-blue-700 border border-blue-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="bg-white text-blue-700 border border-blue-700 px-3 py-2 rounded-full text-xs sm:text-sm font-medium">
                   Add Skills Offered
                 </span>
               )}
 
               {!profile?.skillsWanted?.length && (
-                <span className="bg-white text-green-700 border border-green-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="bg-white text-green-700 border border-green-700 px-3 py-2 rounded-full text-xs sm:text-sm font-medium">
                   Add Skills Wanted
                 </span>
               )}
@@ -384,11 +456,11 @@ const getOtherUserBio = (session) => {
       </div>
 
       {/* BUTTONS */}
-      <div className="flex flex-wrap gap-4 mt-8">
+      <div className="flex flex-col sm:flex-row gap-3 mt-8">
 
         <button
           onClick={() => navigate("/discover")}
-          className="flex items-center gap-2 bg-violet-600 text-white px-7 py-4 rounded-2xl font-semibold hover:scale-105 transition"
+          className="flex items-center justify-center gap-2 border border-violet-300 bg-violet-600 text-white hover:bg-violet-800 px-5 sm:px-7 py-3 sm:py-4 rounded-2xl font-semibold  transition w-full sm:w-auto"
         >
           <FaRocket />
           Explore Users
@@ -396,7 +468,7 @@ const getOtherUserBio = (session) => {
 
         <button
           onClick={() => navigate("/matches")}
-          className="flex items-center gap-2 border border-slate-300 bg-white px-7 py-4 rounded-2xl font-semibold hover:bg-slate-200 transition"
+          className="flex items-center justify-center gap-2 border border-slate-300 bg-white px-5 sm:px-7 py-3 sm:py-4 rounded-2xl font-semibold hover:bg-slate-200 transition w-full sm:w-auto"
         >
           <FaUsers />
           Your Swaps
@@ -406,11 +478,22 @@ const getOtherUserBio = (session) => {
     </div>
 
     {/* RIGHT PROFILE CARD */}
-    <div className="bg-gradient-to-br from-white to-slate-50 rounded-[32px] border border-slate-200 p-7 shadow-md">
+    {/* <div className="bg-gradient-to-br from-white to-slate-50 rounded-[24px] sm:rounded-[28px] border border-slate-200 p-4 sm:p-6 lg:p-7 shadow-md overflow-hidden"> */}
+    <div
+      className="
+        hidden lg:block
+        min-w-0 w-full
+        bg-gradient-to-br from-white to-slate-50
+        rounded-[24px] sm:rounded-[28px]
+        border border-slate-200
+        p-4 sm:p-6 lg:p-7
+        shadow-md
+        overflow-hidden
+      "
+> 
+     <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5">
 
-      <div className="flex items-center gap-5">
-
-        <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-slate-200">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden border-4 border-slate-200">
 
           {profile?.profileImage ? (
             <img
@@ -427,7 +510,7 @@ const getOtherUserBio = (session) => {
         </div>
 
         <div>
-          <h2 className="text-3xl font-bold text-slate-800">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-800">
             {profile?.name}
           </h2>
 
@@ -488,8 +571,7 @@ const getOtherUserBio = (session) => {
       </button>
 
     </div>
-
-  </div>
+</div>
 </div>
 
   {/* STATS */}
@@ -499,131 +581,127 @@ const getOtherUserBio = (session) => {
 
 
   {/* MAIN GRID */}
-  <div className="grid xl:grid-cols-2 gap-8 mt-8">
-
-    {/* CONNECTIONS */}
+{/* MAIN GRID */}
+<div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5 lg:gap-6 mt-5 sm:mt-6">
 {/* RECENT CONNECTIONS */}
-<div className="bg-white rounded-[32px] border border-violet-100 shadow-sm p-6">
+<div className="bg-white rounded-[28px] border border-violet-100 shadow-sm p-4 sm:p-6 h-fit">
+  {/* Header */}
+  <div className="flex items-start justify-between gap-3 mb-5">
 
-  {/* Heading */}
-  <div className="flex items-center justify-between mb-6">
-    <div className="flex items-center gap-3">
-      <div className="bg-violet-100 p-3 rounded-2xl">
-        <FaHandshake className="text-violet-600 text-xl" />
+    <div className="flex items-center gap-3 min-w-0">
+      <div className="bg-violet-100 p-3 rounded-2xl shrink-0">
+        <FaHandshake className="text-violet-600 text-lg sm:text-xl" />
       </div>
 
-      <h2 className="text-2xl font-bold text-violet-700">
+      <h2 className="text-xl sm:text-2xl font-bold text-violet-700 leading-tight">
         Recent Connections
       </h2>
     </div>
 
     <button
       onClick={() => navigate("/matches")}
-      className="text-violet-600 font-semibold hover:underline"
+      className="text-violet-600 font-semibold text-sm sm:text-base whitespace-nowrap"
     >
       View All
     </button>
   </div>
 
-<div className="space-y-4">
-  {matches.length > 0 ? (
-    matches.slice(0, 4).map((item) => {
-      const user = item.user || item;
+  <div className="space-y-4">
+    {matches.length > 0 ? (
+      matches.slice(0, 4).map((item) => {
+        const user = item.user || item;
 
-      return (
-        <div
-          key={user._id}
-          className="
-            bg-violet-50 border border-violet-100
-            rounded-[28px] p-5
-            hover:shadow-md transition
-          "
-        >
-          <div className="flex items-start gap-4">
+        return (
+          <div
+            key={user._id}
+            className="
+              bg-gradient-to-br from-violet-50 to-purple-50
+              border border-violet-200
+              rounded-[28px]
+              p-4 sm:p-5
+              hover:shadow-md
+              transition
+            "
+          >
+            <div className="flex items-center gap-4">
 
-            {/* Profile Image */}
-            <div className="shrink-0">
-              {user?.profileImage ? (
-                <img
-                  src={user.profileImage}
-                  alt={user.name}
-                  className="
-                    w-20 h-20 rounded-2xl
-                    object-cover border-2 border-violet-200
-                  "
-                />
-              ) : (
-                <div
-                  className="
-                    w-20 h-20 rounded-2xl
-                    bg-violet-200 flex items-center justify-center
-                  "
-                >
-                  <FaUserCircle className="text-5xl text-violet-600" />
-                </div>
-              )}
+              {/* Profile */}
+              <div className="shrink-0">
+                {user?.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    alt={user.name}
+                    className="
+                      w-16 h-16 sm:w-20 sm:h-20
+                      rounded-2xl
+                      object-cover
+                      border-2 border-violet-200
+                    "
+                  />
+                ) : (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-violet-200 flex items-center justify-center">
+                    <FaUserCircle className="text-4xl text-violet-600" />
+                  </div>
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg sm:text-xl font-bold text-violet-700 truncate">
+                  {user.name}
+                </h3>
+
+                <p className="text-slate-600 text-sm sm:text-base line-clamp-2 mt-1">
+                  {user.bio || "No bio added yet"}
+                </p>
+              </div>
+
             </div>
-
-            {/* User Details */}
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-violet-700">
-                {user.name}
-              </h3>
-
-              <p className="text-slate-600 mt-2 line-clamp-2">
-                {user.bio || "No bio added yet."}
-              </p>
-            </div>
-
           </div>
-        </div>
-      );
-    })
-  ) : (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <FaHandshake className="text-5xl text-violet-300 mb-4" />
+        );
+      })
+    ) : (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <FaHandshake className="text-5xl text-violet-300 mb-4" />
 
-      <h3 className="text-xl font-semibold text-slate-700">
-        Start Connecting
-      </h3>
+        <h3 className="text-lg font-semibold text-slate-700">
+          Start Connecting
+        </h3>
 
-      <p className="text-slate-500 mt-2">
-        You don’t have any connections yet.
-      </p>
+        <p className="text-slate-500 text-sm mt-2">
+          You don’t have any connections yet.
+        </p>
 
-      <button
-        onClick={() => navigate("/discover")}
-        className="
-          mt-5 px-5 py-3 rounded-2xl
-          bg-violet-600 text-white
-          hover:bg-violet-700 transition
-        "
-      >
-        Find Skill Partners
-      </button>
-    </div>
-  )}
-</div>
+        <button
+          onClick={() => navigate("/discover")}
+          className="mt-5 px-5 py-3 rounded-2xl bg-violet-600 text-white hover:bg-violet-700 transition"
+        >
+          Find Skill Partners
+        </button>
+      </div>
+    )}
+  </div>
 </div>
 
     {/* SESSIONS */}
 {/* UPCOMING SESSIONS */}
-<div className="bg-white rounded-[30px] p-6 border border-slate-200 shadow-sm">
+<div className="bg-white rounded-[28px] border border-violet-100 shadow-sm p-4 sm:p-6 h-fit">
+  {/* Header */}
+  <div className="flex items-start justify-between gap-3 mb-5">
 
-  <div className="flex justify-between items-center mb-6">
-    <div className="flex items-center gap-3">
-      <div className="bg-blue-100 p-3 rounded-2xl">
-        <FaCalendarAlt className="text-blue-600 text-xl" />
+    <div className="flex items-center gap-3 min-w-0">
+      <div className="bg-blue-100 p-3 rounded-2xl shrink-0">
+        <FaCalendarAlt className="text-blue-600 text-lg sm:text-xl" />
       </div>
 
-      <h2 className="text-2xl font-bold text-blue-700">
+      <h2 className="text-xl sm:text-2xl font-bold text-blue-700 leading-tight">
         Upcoming Sessions
       </h2>
     </div>
 
     <button
       onClick={() => navigate("/sessions")}
-      className="text-blue-600 font-semibold hover:underline"
+      className="text-blue-600 font-semibold text-sm sm:text-base whitespace-nowrap"
     >
       View All
     </button>
@@ -631,83 +709,99 @@ const getOtherUserBio = (session) => {
 
   <div className="space-y-4">
     {sessions.length > 0 ? (
-  sessions.slice(0, 4).map((session) => {
-    const otherUser = getOtherUser(session);
+      sessions.slice(0, 4).map((session) => {
+        const otherUser = getOtherUser(session);
 
-    return (
-      <div
-        key={session._id}
-        className="bg-blue-50 border border-blue-200 rounded-3xl p-5 mb-4"
-      >
-        <div className="flex items-center gap-4">
-  <img
-    src={otherUser?.profileImage}
-    alt="profile"
-    className="
-      w-20 h-20 rounded-full
-      object-cover border-2
-      border-blue-300 shadow-sm
-    "
-  />
+        return (
+          <div
+            key={session._id}
+            className="
+              bg-gradient-to-br from-blue-50 to-sky-50
+              border border-blue-200
+              rounded-[30px]
+              p-4 sm:p-5
+              hover:shadow-md
+              transition
+            "
+          >
+            <div className="flex items-center gap-4">
 
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-blue-700">
-              {otherUser?.name}
-            </h3>
+              {/* Image */}
+              <img
+                src={otherUser?.profileImage}
+                alt="profile"
+                className="
+                  w-16 h-16 sm:w-20 sm:h-20
+                  rounded-2xl
+                  object-cover
+                  border-2 border-blue-300
+                  shrink-0
+                "
+              />
 
-            <p className=" text-gray-700 line-clamp-2">
-              {otherUser?.bio || "No bio added yet"}
-            </p>
+              {/* Content */}
+              <div className="flex-1 min-w-0">
 
-            <div
-  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium mt-2 border
-    ${
-      session.startTime
-        ? "bg-blue-100 text-blue-700 border-blue-200"
-        : "bg-green-100 text-green-700 border-green-200"
-    }
-  `}
->
-  <FaCalendarAlt
-    className={
-      session.startTime
-        ? "text-blue-600"
-        : "text-green-600"
-    }
-  />
+                <h3 className="text-lg sm:text-xl font-bold text-blue-700 truncate">
+                  {otherUser?.name}
+                </h3>
 
-  <span>
-    {session.startTime
-      ? new Date(session.startTime).toLocaleString()
-      : "Instant Session"}
-  </span>
-</div>
-            
+                <p className="text-slate-600 text-sm sm:text-base line-clamp-1 mt-1">
+                  {otherUser?.bio || "No bio added yet"}
+                </p>
+
+                {/* Date Card */}
+                <div
+                  className="
+                    inline-flex
+                    items-center
+                    gap-2
+                    mt-3
+                    px-3 py-2
+                    rounded-2xl
+                    text-xs sm:text-sm
+                    font-medium
+                    bg-blue-100
+                    text-blue-700
+                    border border-blue-200
+                  "
+                >
+                  <FaCalendarAlt className="text-blue-600" />
+
+                  <span>
+                    {session.startTime
+                      ? new Date(
+                          session.startTime
+                        ).toLocaleString()
+                      : "Instant Session"}
+                  </span>
+                </div>
+
+              </div>
+            </div>
           </div>
-        </div>
+        );
+      })
+    ) : (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <FaCalendarAlt className="text-5xl text-blue-300 mb-4" />
+
+        <h3 className="text-lg font-semibold text-slate-700">
+          Start Session Journey
+        </h3>
+
+        <p className="text-slate-500 text-sm mt-2">
+          No upcoming sessions yet.
+        </p>
+
+        <button
+          onClick={() => navigate("/matches")}
+          className="mt-5 px-5 py-3 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition"
+        >
+          Create First Session
+        </button>
       </div>
-    );
-  })
-) : (
-  <div className="flex flex-col items-center justify-center py-16 text-center">
-    <FaCalendarAlt className="text-5xl text-blue-300 mb-4" />
-
-    <h3 className="text-xl font-semibold text-slate-700">
-      Start Session Journey
-    </h3>
-
-    <p className="text-slate-500 mt-2">
-      No upcoming sessions yet.
-    </p>
-
-    <button
-      onClick={() => navigate("/matches")}
-      className="mt-5 px-5 py-3 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition"
-    >
-      Create First Session
-    </button>
-  </div>
-)}
+    )}
   </div>
 </div>
 

@@ -22,6 +22,7 @@ import VideoRoom from "./pages/VideoRoom";
 
 import Main from "./main/main";
 
+import Notification from "./pages/Notification";
 
 function App() {
   return (
@@ -29,8 +30,8 @@ function App() {
       <Routes>
 
         {/* PUBLIC */}
-        <Route path="/" element={<Login />} />
-        <Route path="/main" element={<Main />} />
+        <Route path="/" element={<Main />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         {/* <Route path="/verify-otp" element={<VerifyOtp />} /> */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -160,6 +161,17 @@ function App() {
                   <VideoRoom />
                 </Layout>
               </>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <Notification />
+              </Layout>
             </PrivateRoute>
           }
         />

@@ -1,4 +1,10 @@
-import { useParams, Link } from "react-router-dom";
+
+import {
+  useParams,
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
 import {
   useEffect,
   useState,
@@ -7,13 +13,11 @@ import {
 
 import {
   FaPaperPlane,
+  FaCircle,
+  FaArrowLeft,
   FaSearch,
   FaEllipsisV,
-  FaCircle,
-   FaCheck,
-  FaCheckDouble,
 } from "react-icons/fa";
-
 
 import { io } from "socket.io-client";
 
@@ -23,104 +27,139 @@ import {
   getConversations,
 } from "../api/api";
 
-// SOCKET
-const socket = io("http://localhost:5000");
+// ================= SOCKET =================
+
+const socket = io(
+  "http://localhost:5000"
+);
 
 export default function Chat() {
-
   const { id } = useParams();
 
-const [unread, setUnread] = useState({});
+
   
 
   const currentUser = localStorage.getItem("userId");
 
-  const [isTyping, setIsTyping] =
-  useState(false);
+  const [message, setMessage] =
+    useState("");
 
-const [lastSeen, setLastSeen] =
-  useState({});
+  const [search, setSearch] =
+    useState("");
 
-const typingTimeout =
-  useRef(null);
+  const [messages, setMessages] =
+    useState([]);
 
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [onlineUsers, setOnlineUsers] = useState([]);
-  const [conversations, setConversations] = useState([]);
-const selectedChatId = id;
+  const [
+    onlineUsers,
+    setOnlineUsers,
+  ] = useState([]);
 
-const selectedChat = conversations.find(
-  (chat) =>
-    String(chat.user?._id) === String(selectedChatId)
-);
-const selectedUser = selectedChat?.user;
+  const [
+    conversations,
+    setConversations,
+  ] = useState([]);
 
-  const bottomRef = useRef(null);
+  const bottomRef =
+    useRef(null);
 
-  const loadConversations = async () => {
-    try {
-      const res = await getConversations();
+  const selectedChatId =
+    id;
 
-      setConversations(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  // ================= SELECTED CHAT =================
 
-  // ================= LOAD =================
-useEffect(() => {
-  loadConversations();
-  socket.emit("join", currentUser);
-}, []);
+  const selectedChat =
+    conversations.find(
+      (chat) =>
+        String(
+          chat.user?._id
+        ) ===
+        String(
+          selectedChatId
+        )
+    );
 
+  const selectedUser =
+    selectedChat?.user;
 
+  // ================= LOAD CONVERSATIONS =================
 
+  const loadConversations =
+    async () => {
+      try {
+        const res =
+          await getConversations();
+
+        setConversations(
+          res.data
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+  // ================= FETCH MESSAGES =================
+
+  const fetchMessages =
+    async () => {
+      try {
+        const res =
+          await getMessages(
+            currentUser,
+            selectedChatId
+          );
+
+        const sorted =
+          res.data.sort(
+            (a, b) =>
+              new Date(
+                a.createdAt
+              ) -
+              new Date(
+                b.createdAt
+              )
+          );
+
+        setMessages(
+          sorted
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+  // ================= INITIAL LOAD =================
+
+  useEffect(() => {
+    loadConversations();
+
+    socket.emit(
+      "join",
+      currentUser
+    );
+  }, []);
+
+  // ================= CHAT CHANGE =================
 
 useEffect(() => {
   if (selectedChatId) {
     fetchMessages();
-
-    socket.emit("markAsRead", {
-      userId: currentUser,
-      chatUserId: selectedChatId,
-    });
   }
 }, [selectedChatId]);
 
-useEffect(() => {
-  messages.forEach((msg) => {
-
-    if (
-      msg.sender ===
-      selectedChatId &&
-      !msg.seen
-    ) {
-
-      socket.emit(
-        "messageSeen",
-        {
-          messageId: msg._id,
-          sender: msg.sender,
-        }
-      );
-    }
-  });
-}, [messages]);
-
-
-
-
   // ================= AUTO SCROLL =================
+
   useEffect(() => {
-
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-
+    bottomRef.current?.scrollIntoView(
+      {
+        behavior:
+          "smooth",
+      }
+    );
   }, [messages]);
 
-  // ================= SOCKET LISTENERS =================
+  // ================= SOCKET =================
+
   useEffect(() => {
 
     const handleMessage = (data) => {
@@ -138,38 +177,6 @@ useEffect(() => {
       }
 
     };
-
-
-socket.on("unreadUpdate", (data) => {
-  setUnread(data);
-  loadConversations();
-});
-
-socket.on("typing", () => {
-  setIsTyping(true);
-});
-
-socket.on("stopTyping", () => {
-  setIsTyping(false);
-});
-
-
-socket.on("lastSeenUpdate", (data) => {
-  console.log("LAST SEEN DATA:", data);
-
-  setLastSeen(data);
-});
-
-socket.on("messageSeen", ({ messageId }) => {
-  setMessages((prev) =>
-    prev.map((msg) =>
-      msg._id === messageId
-        ? { ...msg, seen: true }
-        : msg
-    )
-  );
-});
-    
 
 const handleOnlineUsers = (users) => {
 
@@ -191,7 +198,6 @@ const handleOnlineUsers = (users) => {
     );
 
     return () => {
-
       socket.off(
         "receiveMessage",
         handleMessage
@@ -202,102 +208,66 @@ const handleOnlineUsers = (users) => {
         handleOnlineUsers
       );
 
-      socket.off("unreadUpdate");
-
-      socket.off("typing");
-socket.off("stopTyping");
-socket.off("messageSeen");
-
-socket.off(
-  "lastSeenUpdate"
-);
-
     };
-
-  }, [currentUser, selectedChatId]);
-
-  // ================= FETCH MESSAGES =================
-  const fetchMessages = async () => {
-
-    try {
-
-      const res = await getMessages(
-        currentUser,
-        selectedChatId
-      );
-
-      // SORT BY TIME
-      const sortedMessages =
-        res.data.sort(
-          (a, b) =>
-            new Date(a.createdAt) -
-            new Date(b.createdAt)
-        );
-
-      setMessages(sortedMessages);
-
-    } catch (err) {
-
-      console.log(err);
-
-    }
-
-  };
+  }, [
+    currentUser,
+    selectedChatId,
+  ]);
 
   // ================= SEND MESSAGE =================
-  const handleSend = async () => {
 
-    if (!message.trim()) return;
+  const handleSend =
+    async () => {
+      if (
+        !message.trim()
+      )
+        return;
 
-    try {
+      try {
+        const newMsg = {
+          sender:
+            currentUser,
+          receiver:
+            selectedChatId,
+          text: message,
+        };
 
-      const newMsg = {
-        sender: currentUser,
-        receiver: selectedChatId,
-        text: message,
-      };
-// SAVE IN DB
-const res = await sendMessage(newMsg);
+        const res =
+          await sendMessage(
+            newMsg
+          );
 
-// INSTANTLY UPDATE SENDER UI
-setMessages((prev) => [...prev, res.data]);
+        setMessages(
+          (prev) => [
+            ...prev,
+            res.data,
+          ]
+        );
 
-loadConversations();
-
-// SEND TO RECEIVER
-socket.emit(
-  "sendMessage",
-  res.data
-);
+        socket.emit(
+          "sendMessage",
+          res.data
+        );
 
 setMessage("");
 
-socket.emit("stopTyping", {
-  sender: currentUser,
-  receiver: selectedChatId,
-});
-
-setIsTyping(false);
-
-loadConversations();
-    } catch (err) {
-
-      console.log(err);
-
-    }
-
-  };
+        loadConversations();
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
   // ================= ENTER KEY =================
-  const handleKeyPress = (e) => {
 
-    if (e.key === "Enter") {
-
-      handleSend();
-
-    }
-
-  };
+  const handleKeyPress =
+    (e) => {
+      if (
+        e.key ===
+        "Enter"
+      ) {
+        handleSend();
+      }
+    };
 
   // ================= ONLINE STATUS =================
 const isOnline = onlineUsers.some(
@@ -305,103 +275,56 @@ const isOnline = onlineUsers.some(
     String(user.userId) === String(selectedChatId)
 );
 
-const formatDateLabel = (date) => {
-  const msgDate = new Date(date);
-
-  const today = new Date();
-
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-
-  if (msgDate.toDateString() === today.toDateString()) {
-    return "Today";
-  }
-
-  if (
-    msgDate.toDateString() ===
-    yesterday.toDateString()
-  ) {
-    return "Yesterday";
-  }
-
-  return msgDate.toLocaleDateString([], {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-};
-
-const formatLastSeen = (date) => {
-  if (!date) return "";
-
-  const d = new Date(date);
-
-  return d.toLocaleString([], {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-
-console.log(
-  "selectedChatId:",
-  selectedChatId
-);
-
-console.log(
-  "lastSeen:",
-  lastSeen
-);
-
-
-console.log("selectedChatId:", selectedChatId);
-console.log("selectedUser:", selectedUser?._id);
-console.log(
-  "selected user last seen:",
-  lastSeen[selectedChatId]
-);
-
-
   return (
-
-    <div className="h-screen bg-gray-100 flex overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-[#f8fafc]">
 
       {/* ================= SIDEBAR ================= */}
 
-      
-<div className="w-full md:w-[340px] bg-white border-r flex flex-col">
-        {/* TOP */}
-        <div className="p-5 border-b flex items-center justify-between">
+      <div
+        className={`${
+          selectedChatId
+            ? "hidden lg:flex"
+            : "flex"
+        }
+        w-full md:w-[340px] lg:w-[360px]
+        bg-white border-r
+        flex-col h-screen flex-shrink-0`}
+      >
 
-          <h2 className="text-2xl font-bold text-indigo-600">
+        {/* HEADER */}
+
+        <div className="p-4 border-b flex items-center justify-between flex-shrink-0">
+
+          <h2 className="text-2xl font-bold text-violet-600">
             SkillSwap
           </h2>
 
-          <button className="bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition">
-
-            <FaEllipsisV />
-
-          </button>
-
+          <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+            💬
+          </div>
         </div>
 
         {/* SEARCH */}
-        <div className="p-4">
 
-          <div className="flex items-center gap-3 bg-gray-100 px-4 py-3 rounded-2xl">
+        <div className="p-4 border-b flex-shrink-0">
 
-            <FaSearch className="text-gray-400" />
+          <div className="flex items-center gap-3 bg-gray-100 rounded-2xl px-4 py-3">
+
+            <FaSearch className="text-gray-400 text-sm" />
 
             <input
               type="text"
-              placeholder="Search conversations"
-              className="bg-transparent outline-none w-full"
+              placeholder="Search chats..."
+              value={search}
+              onChange={(e) =>
+                setSearch(
+                  e.target
+                    .value
+                )
+              }
+              className="bg-transparent outline-none w-full text-sm"
             />
-
           </div>
-
         </div>
 
 
@@ -416,58 +339,65 @@ console.log(
 
       const userId = chat.user?._id;
 
-     const unreadCount =
-  unread[currentUser]?.[userId] || 0;
-
-const isActiveChat =
-  String(id) === String(userId);
-
       const isUserOnline = onlineUsers.some(
         (u) => String(u.userId) === String(userId)
       );
 
-      return (
-        <Link key={userId} to={`/chat/${userId}`}>
-          
-         <div
-  className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition mb-2 hover:bg-gray-50 ${
-  String(id) === String(userId)
-  ? "bg-indigo-50"
-  : ""
-  }`}
->
+                return (
+                  <Link
+                    key={
+                      userId
+                    }
+                    to={`/chat/${userId}`}
+                  >
+                    <div
+                      className={`flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 cursor-pointer mb-2 ${
+                        isActive
+                          ? "bg-violet-100 border border-violet-200"
+                          : "hover:bg-gray-100"
+                      }`}
+                    >
+                                          {/* USER IMAGE */}
 
-            {/* 👇 YOUR CODE (WITH ONLINE DOT ADDED) */}
-           <div className="relative">
-              <img
-               src={
-  chat.user?.profileImage ||
-  `https://ui-avatars.com/api/?name=${chat.user?.name}&background=6366f1&color=fff`
-}
-               className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-                alt="avatar"
-              />
+                      <div className="relative flex-shrink-0">
 
-              {/* online dot */}
-              <span
-                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                  isUserOnline ? "bg-green-500" : "bg-gray-400"
-                }`}
-              />
-            </div>
+                        <img
+                          src={
+                            chat.user
+                              ?.profileImage ||
+                            `https://ui-avatars.com/api/?name=${chat.user?.name}&background=7c3aed&color=fff`
+                          }
+                          alt="user"
+                          className="w-12 h-12 lg:w-14 lg:h-14 rounded-full object-cover"
+                          onError={(
+                            e
+                          ) => {
+                            e.target.src = `https://ui-avatars.com/api/?name=${chat.user?.name}&background=7c3aed&color=fff`;
+                          }}
+                        />
 
-            {/* 👇 TEXT PART (your code) */}
-<div className="flex-1 min-w-0">
+                        {/* ONLINE STATUS */}
 
-<div className="flex justify-between items-center">
+                        <span
+                          className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                            userOnline
+                              ? "bg-green-500"
+                              : "bg-gray-400"
+                          }`}
+                        />
+                      </div>
 
-  <p className="font-semibold truncate">
-    {chat.user?.name}
-  </p>
+                      {/* USER INFO */}
 
-  <div className="flex items-center gap-2">
-    
-    <span className="text-xs text-gray-400">
+                      <div className="flex-1 min-w-0">
+
+  <div className="flex justify-between items-center">
+
+    <p className="font-semibold truncate">
+      {chat.user?.name}
+    </p>
+
+    <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
       {chat.updatedAt
         ? new Date(chat.updatedAt).toLocaleTimeString([], {
             hour: "2-digit",
@@ -476,97 +406,93 @@ const isActiveChat =
         : ""}
     </span>
 
-    {unreadCount > 0 && !isActiveChat && (
-  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-    {unreadCount}
-  </span>
-)}
-
   </div>
 
-</div>
-
-  <p className="text-sm text-gray-500 truncate">
-    {chat.lastMessage}
-  </p>
-
-</div>
-
-          </div>
-
-        </Link>
-      );
-    })
-  )}
-
-</div>
-
+                        <p className="text-sm text-gray-500 truncate mt-1">
+                          {chat.lastMessage ||
+                            "Start conversation"}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              }
+            )
+          )}
+        </div>
       </div>
 
       {/* ================= CHAT AREA ================= */}
 
-     {!selectedChatId ? (
+      {!selectedChatId ? (
+        <div className="hidden lg:flex flex-1 items-center justify-center bg-[#f8fafc]">
 
-  <div className="flex-1 flex items-center justify-center bg-gray-100">
-    <div className="text-center">
-      <h2 className="text-2xl font-bold text-gray-700">
-        SkillSwap Chat
+          <div className="text-center px-6">
+
+            <div className="w-28 h-28 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-14 h-14 bg-violet-600 rounded-full" />
+            </div>
+
+            <h2 className="text-3xl font-bold text-gray-800">
+              SkillSwap Chat
+            </h2>
+
+            <p className="text-gray-500 mt-3 text-lg max-w-md">
+              Select a conversation
+              to start chatting and
+              connect with learners
+              around the world.
+            </p>
+          </div>
+        </div>
+      ) : (
+
+          <div className="flex-1 flex flex-col h-screen min-h-0 overflow-hidden bg-[#f5f5f7]">
+
+  {/* ================= HEADER ================= */}
+
+  <div className="bg-white border-b px-4 lg:px-6 py-3 flex items-center shadow-sm flex-shrink-0">
+
+    {/* MOBILE BACK BUTTON */}
+    <button
+      onClick={() => navigate("/chats")}
+      className="lg:hidden mr-3 w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0"
+    >
+      <FaArrowLeft />
+    </button>
+
+    {/* USER IMAGE */}
+    <img
+      src={
+        selectedUser?.profileImage ||
+        `https://ui-avatars.com/api/?name=${
+          selectedUser?.name || "User"
+        }&background=7c3aed&color=fff`
+      }
+      alt={selectedUser?.name}
+      className="w-11 h-11 lg:w-14 lg:h-14 rounded-full object-cover flex-shrink-0"
+    />
+
+    {/* USER DETAILS */}
+    <div className="ml-3 min-w-0">
+      <h2 className="font-bold text-sm lg:text-lg truncate text-gray-800">
+        {selectedUser?.name || "Loading..."}
       </h2>
 
-      <p className="text-gray-500 mt-2">
-        Select a conversation to start chatting
-      </p>
-    </div>
-  </div>
-
-) : (
-
-  <div className="flex-1 flex flex-col">
-
-        {/* HEADER */}
-        <div className="bg-white px-6 py-4 border-b flex items-center justify-between shadow-sm">
-
-          <div className="flex items-center gap-4">
-<img
-  src={
-  selectedUser?.profileImage ||
-  `https://ui-avatars.com/api/?name=${selectedUser?.name || "User"}&background=6366f1&color=fff`
-}
-  alt={selectedUser?.name}
-  className="w-14 h-14 rounded-full object-cover"
-  onError={(e) => {
-  e.target.src = `https://ui-avatars.com/api/?name=${selectedUser?.name || "User"}&background=6366f1&color=fff`;
-  }}
-/>
-
-            <div>
-<h2 className="font-bold text-xl">
-  {selectedUser?.name || "Loading..."}
-</h2>
-              <div className="flex items-center gap-2 mt-1">
-
-                <FaCircle
-                  className={`text-xs ${
-                    isOnline
-                      ? "text-green-500"
-                      : "text-gray-400"
-                  }`}
-                />
+      <div className="flex items-center gap-2 mt-1">
+        <FaCircle
+          className={`text-[9px] ${
+            isOnline
+              ? "text-green-500"
+              : "text-gray-400"
+          }`}
+        />
 
                 <span className="text-sm text-gray-500">
 
-
-{isTyping ? (
-  "Typing..."
-) : isOnline ? (
-  "Online"
-) : lastSeen[selectedChatId] ? (
-  `Last seen ${new Date(
-    lastSeen[selectedChatId]
-  ).toLocaleString()}`
-) : (
-  "Offline"
-)}
+                  {isOnline
+                    ? "Online"
+                    : "Offline"}
 
                 </span>
 
@@ -587,47 +513,20 @@ const isActiveChat =
 
         </div>
 
-        {/* ================= MESSAGES ================= */}
+  {/* ================= MESSAGES ================= */}
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-gray-100">
+  <div className="flex-1 overflow-y-auto px-4 py-5 space-y-4 min-h-0">
 
-          {messages.map((msg, index) => {
-          
-         
+          {messages.map((msg, index) => (
 
-          const currentDate = new Date(
-            msg.createdAt
-              ).toDateString();
-
-              const previousDate =
-             index > 0
-      ? new Date(
-          messages[index - 1].createdAt
-        ).toDateString()
-      : null;
-
-const showDate =
-  currentDate !== previousDate;
-
-return (
-
-<div key={msg._id || `${msg.createdAt}-${index}`}>
-  
-  {showDate && (
-    <div className="flex justify-center my-4">
-      <span className="bg-white px-4 py-1 rounded-full text-xs text-gray-500 shadow">
-        {formatDateLabel(msg.createdAt)}
-      </span>
-    </div>
-  )}
-
-  <div
-    className={`flex ${
-      msg.sender === currentUser
-        ? "justify-end"
-        : "justify-start"
-    }`}
-  >
+            <div
+              key={msg._id || index}
+              className={`flex ${
+                msg.sender === currentUser
+                  ? "justify-end"
+                  : "justify-start"
+              }`}
+            >
 
               <div
                 className={`max-w-[70%] px-5 py-3 rounded-3xl shadow-sm ${
@@ -640,95 +539,66 @@ return (
                 <p className="text-[15px] break-words">
                   {msg.text}
                 </p>
- <div
-  className={`flex items-center gap-1 justify-end text-xs mt-2 ${
-    msg.sender === currentUser
-      ? "text-indigo-100"
-      : "text-gray-400"
-  }`}
->
-  <span>
-    {msg.createdAt
-      ? new Date(msg.createdAt).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : ""}
-  </span>
 
-  {msg.sender === currentUser && (
-    msg.seen ? (
-      <FaCheckDouble className="text-blue-300" />
-    ) : (
-      <FaCheck />
-    )
-  )}
-</div>
+                <p
+                  className={`text-xs mt-2 ${
+                    msg.sender === currentUser
+                      ? "text-indigo-100"
+                      : "text-gray-400"
+                  }`}
+                >
+
+                  {msg.createdAt
+                    ? new Date(
+                        msg.createdAt
+                      ).toLocaleTimeString(
+                        [],
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )
+                    : ""}
+
+                </p>
 
               </div>
+
             </div>
-          </div>
-        );
-      })}
 
-      <div ref={bottomRef}></div>
+          ))}
 
-    </div>
+          <div ref={bottomRef}></div>
 
-        {/* ================= INPUT ================= */}
+        </div>
 
-        <div className="bg-white p-5 border-t">
+  {/* ================= INPUT ================= */}
 
-          <div className="flex items-center gap-4 bg-gray-100 rounded-2xl px-5 py-3">
+  <div className="bg-white border-t p-3 flex-shrink-0">
+
+    <div className="flex items-center gap-3 bg-gray-100 rounded-2xl px-4 py-2">
 
             <input
               type="text"
               placeholder="Type a message..."
               value={message}
-             onChange={(e) => {
-  setMessage(e.target.value);
-
-  socket.emit("typing", {
-    sender: currentUser,
-    receiver: selectedChatId,
-  });
-
-  clearTimeout(
-    typingTimeout.current
-  );
-
-  typingTimeout.current =
-    setTimeout(() => {
-      socket.emit(
-        "stopTyping",
-        {
-          sender: currentUser,
-          receiver: selectedChatId,
-        }
-      );
-    }, 1000);
-}}
+              onChange={(e) =>
+                setMessage(e.target.value)
+              }
               onKeyDown={handleKeyPress}
               className="flex-1 bg-transparent outline-none text-lg"
             />
 
-            <button
-              onClick={handleSend}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full transition"
-            >
-
-              <FaPaperPlane />
-
-            </button>
-
-          </div>
-
-               </div>
-
-      </div>
-
-)}
-
+      <button
+        onClick={handleSend}
+        className="w-12 h-12 rounded-full bg-violet-600 hover:bg-violet-700 text-white flex items-center justify-center shrink-0 transition"
+      >
+        <FaPaperPlane />
+      </button>
+    </div>
+  </div>
+</div>
+      )}
     </div>
   );
 }

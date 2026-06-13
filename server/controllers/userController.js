@@ -49,75 +49,100 @@ exports.updateProfile = async (req, res) => {
 };
 
 // ================= GET ALL USERS =================
-exports.getAllUsers =
-  async (req, res) => {
-    try {
-      const currentUserId =
-        req.user?.id;
+// // ================= GET ALL DISCOVER USERS =================
 
-      const users =
-        await User.find({
-          _id: {
-            $ne: currentUserId,
-          },
-        }).select("-password");
+exports.getAllUsers = async (req, res) => {
+  try {
+    const currentUserId = req.user.id;
 
-      res.json(users);
-    } catch (err) {
-      res.status(500).json({
-        error: err.message,
-      });
-    }
-  };
+    // Get all requests where current user is involved
+    const requests = await Request.find({
+      $or: [
+        { sender: currentUserId },
+        { receiver: currentUserId },
+      ],
+    });
+
+    // Users that should be hidden
+    const blockedUsers = new Set();
+
+    requests.forEach((request) => {
+
+      const otherUser =
+        request.sender.toString() === currentUserId
+          ? request.receiver.toString()
+          : request.sender.toString();
+
+      // Hide only pending and accepted users
+      if (
+        request.status === "pending" ||
+        request.status === "accepted"
+      ) {
+        blockedUsers.add(otherUser);
+      }
+    });
+
+
+    // Show:
+    // - users with ignored requests
+    // - users with no requests
+    const users = await User.find({
+      _id: {
+        $nin: [
+          currentUserId,
+          ...blockedUsers,
+        ],
+      },
+    }).select("-password");
+
+
+    res.json(users);
+
+  } catch (err) {
+    console.log("GET USERS ERROR:", err);
+
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
 
 // ================= SKIP USER =================
-exports.skipUser =
-  async (req, res) => {
-    try {
-      const currentUserId =
-        req.user.id;
+exports.skipUser = async (req, res) => {
+  try {
+    const currentUserId = req.user.id;
+    const targetUserId = req.params.id;
 
-      const targetUserId =
-        req.params.id;
+    let existing = await Request.findOne({
+      sender: currentUserId,
+      receiver: targetUserId,
+    });
 
-      let existing =
-        await Request.findOne({
-          sender:
-            currentUserId,
-          receiver:
-            targetUserId,
-        });
+    if (existing) {
+      existing.status = "ignored";
 
-      if (existing) {
-        existing.status =
-          "skipped";
+      await existing.save();
 
-        await existing.save();
-
-        return res.json({
-          message:
-            "User skipped",
-        });
-      }
-
-      await Request.create({
-        sender:
-          currentUserId,
-        receiver:
-          targetUserId,
-        status: "skipped",
-      });
-
-      res.json({
-        message:
-          "User skipped",
-      });
-    } catch (err) {
-      res.status(500).json({
-        error: err.message,
+      return res.json({
+        message: "User skipped",
       });
     }
-  };
+
+    await Request.create({
+      sender: currentUserId,
+      receiver: targetUserId,
+      status: "ignored",
+    });
+
+    res.json({
+      message: "User skipped",
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
 
 // ================= LIKE USER =================
 exports.likeUser =
@@ -161,52 +186,6 @@ exports.likeUser =
   };
 
 // ================= UPLOAD PROFILE IMAGE =================
-// exports.uploadProfileImage =
-//   async (req, res) => {
-//     try {
-//       const user =
-//         await User.findById(
-//           req.user.id
-//         );
-
-//       if (!user) {
-//         return res
-//           .status(404)
-//           .json({
-//             message:
-//               "User not found",
-//           });
-//       }
-
-//       if (!req.file) {
-//         return res
-//           .status(400)
-//           .json({
-//             message:
-//               "No image uploaded",
-//           });
-//       }
-
-//       // Cloudinary URL
-//       user.profileImage =
-//         req.file.path;
-
-//       await user.save();
-
-//       res.status(200).json({
-//         success: true,
-//         image:
-//           user.profileImage,
-//       });
-//     } catch (error) {
-//       console.log(error);
-
-//       res.status(500).json({
-//         message:
-//           "Upload failed",
-//       });
-//     }
-//   };
 
 exports.uploadProfileImage =
   async (req, res) => {
