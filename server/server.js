@@ -62,6 +62,10 @@ const io = new Server(server, {
 // ================= ONLINE USERS =================
 let onlineUsers = [];
 
+let lastSeen = {};
+
+let unreadMessages = {};
+
 // ADD USER
 const addUser = (userId, socketId) => {
   const exists = onlineUsers.find(
@@ -78,8 +82,22 @@ const addUser = (userId, socketId) => {
 
 // REMOVE USER
 const removeUser = (socketId) => {
+  const user = onlineUsers.find(
+    (u) => u.socketId === socketId
+  );
+
+  if (user) {
+    lastSeen[user.userId] = new Date();
+
+    console.log(
+      "LAST SEEN SAVED:",
+      user.userId,
+      lastSeen[user.userId]
+    );
+  }
+
   onlineUsers = onlineUsers.filter(
-    (user) => user.socketId !== socketId
+    (u) => u.socketId !== socketId
   );
 };
 
@@ -90,18 +108,22 @@ const getUser = (userId) => {
   );
 };
 
+
 // ================= SOCKET CONNECTION =================
 io.on("connection", (socket) => {
 
-  socket.on("join", (userId) => {
-    addUser(userId, socket.id);
+socket.on("join", (userId) => {
+  addUser(userId, socket.id);
 
-    io.emit(
-      "getOnlineUsers",
-      onlineUsers
-    );
-  });
+  console.log("USER JOINED:", userId);
 
+  io.emit("getOnlineUsers", onlineUsers);
+
+  socket.emit(
+    "lastSeenUpdate",
+    lastSeen
+  );
+});
   socket.on("sendMessage", (data) => {
     const user = getUser(
       data.receiver
@@ -113,6 +135,23 @@ io.on("connection", (socket) => {
         data
       );
     }
+
+  const receiverId = data.receiver;
+const senderId = data.sender;
+
+if (!unreadMessages[receiverId]) {
+  unreadMessages[receiverId] = {};
+}
+
+if (!unreadMessages[receiverId][senderId]) {
+  unreadMessages[receiverId][senderId] = 0;
+}
+
+unreadMessages[receiverId][senderId] += 1;
+
+io.emit("unreadUpdate", unreadMessages);
+  
+
   });
 
   socket.on("typing", ({ sender, receiver }) => {
@@ -135,6 +174,16 @@ io.on("connection", (socket) => {
     }
   });
 
+socket.on("markAsRead", ({ userId, chatUserId }) => {
+  if (unreadMessages[userId]?.[chatUserId] !== undefined) {
+    unreadMessages[userId][chatUserId] = 0;
+  }
+
+  io.emit("unreadUpdate", unreadMessages);
+
+ 
+});
+
   socket.on(
     "messageSeen",
     async ({ messageId, sender }) => {
@@ -156,21 +205,41 @@ io.on("connection", (socket) => {
       }
     }
   );
+socket.on("disconnect", () => {
+  const user = onlineUsers.find(
+    (u) => u.socketId === socket.id
+  );
 
-  socket.on("disconnect", () => {
-    removeUser(socket.id);
-
-    io.emit(
-      "getOnlineUsers",
-      onlineUsers
-    );
+  if (user) {
+    lastSeen[user.userId] =
+      new Date().toISOString();
 
     console.log(
-      "Socket disconnected:",
-      socket.id
+      "LAST SEEN SAVED:",
+      user.userId,
+      lastSeen[user.userId]
     );
-  });
+  }
+
+  removeUser(socket.id);
+
+  io.emit(
+    "getOnlineUsers",
+    onlineUsers
+  );
+
+  io.emit(
+    "lastSeenUpdate",
+    lastSeen
+  );
+
+  console.log(
+    "LAST SEEN OBJECT:",
+    lastSeen
+  );
 });
+
+}); // <-- closes io.on("connection")
 // ================= SESSION SOCKET =================
 initializeSessionSocket(io);
 

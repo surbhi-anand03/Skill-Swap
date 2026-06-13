@@ -30,13 +30,16 @@ export default function Chat() {
 
   const { id } = useParams();
 
-
+const [unread, setUnread] = useState({});
   
 
   const currentUser = localStorage.getItem("userId");
 
-const [isTyping, setIsTyping] =
+  const [isTyping, setIsTyping] =
   useState(false);
+
+const [lastSeen, setLastSeen] =
+  useState({});
 
 const typingTimeout =
   useRef(null);
@@ -77,9 +80,13 @@ useEffect(() => {
 useEffect(() => {
   if (selectedChatId) {
     fetchMessages();
+
+    socket.emit("markAsRead", {
+      userId: currentUser,
+      chatUserId: selectedChatId,
+    });
   }
 }, [selectedChatId]);
-
 
 useEffect(() => {
   messages.forEach((msg) => {
@@ -132,12 +139,25 @@ useEffect(() => {
 
     };
 
+
+socket.on("unreadUpdate", (data) => {
+  setUnread(data);
+  loadConversations();
+});
+
 socket.on("typing", () => {
   setIsTyping(true);
 });
 
 socket.on("stopTyping", () => {
   setIsTyping(false);
+});
+
+
+socket.on("lastSeenUpdate", (data) => {
+  console.log("LAST SEEN DATA:", data);
+
+  setLastSeen(data);
 });
 
 socket.on("messageSeen", ({ messageId }) => {
@@ -182,9 +202,15 @@ const handleOnlineUsers = (users) => {
         handleOnlineUsers
       );
 
+      socket.off("unreadUpdate");
+
       socket.off("typing");
 socket.off("stopTyping");
 socket.off("messageSeen");
+
+socket.off(
+  "lastSeenUpdate"
+);
 
     };
 
@@ -305,6 +331,38 @@ const formatDateLabel = (date) => {
   });
 };
 
+const formatLastSeen = (date) => {
+  if (!date) return "";
+
+  const d = new Date(date);
+
+  return d.toLocaleString([], {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+
+console.log(
+  "selectedChatId:",
+  selectedChatId
+);
+
+console.log(
+  "lastSeen:",
+  lastSeen
+);
+
+
+console.log("selectedChatId:", selectedChatId);
+console.log("selectedUser:", selectedUser?._id);
+console.log(
+  "selected user last seen:",
+  lastSeen[selectedChatId]
+);
+
 
   return (
 
@@ -358,6 +416,12 @@ const formatDateLabel = (date) => {
 
       const userId = chat.user?._id;
 
+     const unreadCount =
+  unread[currentUser]?.[userId] || 0;
+
+const isActiveChat =
+  String(id) === String(userId);
+
       const isUserOnline = onlineUsers.some(
         (u) => String(u.userId) === String(userId)
       );
@@ -395,13 +459,15 @@ const formatDateLabel = (date) => {
             {/* 👇 TEXT PART (your code) */}
 <div className="flex-1 min-w-0">
 
-  <div className="flex justify-between items-center">
+<div className="flex justify-between items-center">
 
-    <p className="font-semibold truncate">
-      {chat.user?.name}
-    </p>
+  <p className="font-semibold truncate">
+    {chat.user?.name}
+  </p>
 
-    <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+  <div className="flex items-center gap-2">
+    
+    <span className="text-xs text-gray-400">
       {chat.updatedAt
         ? new Date(chat.updatedAt).toLocaleTimeString([], {
             hour: "2-digit",
@@ -410,7 +476,15 @@ const formatDateLabel = (date) => {
         : ""}
     </span>
 
+    {unreadCount > 0 && !isActiveChat && (
+  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+    {unreadCount}
+  </span>
+)}
+
   </div>
+
+</div>
 
   <p className="text-sm text-gray-500 truncate">
     {chat.lastMessage}
@@ -481,11 +555,18 @@ const formatDateLabel = (date) => {
 
                 <span className="text-sm text-gray-500">
 
-                   {isTyping
-   ? "Typing..."
-   : isOnline
-   ? "Online"
-   : "Offline"}
+
+{isTyping ? (
+  "Typing..."
+) : isOnline ? (
+  "Online"
+) : lastSeen[selectedChatId] ? (
+  `Last seen ${new Date(
+    lastSeen[selectedChatId]
+  ).toLocaleString()}`
+) : (
+  "Offline"
+)}
 
                 </span>
 
@@ -560,13 +641,14 @@ return (
                   {msg.text}
                 </p>
 <div className="flex items-center justify-end gap-1 mt-2">
-  <span
-    className={`text-xs ${
-      msg.sender === currentUser
-        ? "text-indigo-100"
-        : "text-gray-400"
-    }`}
-  >
+ <div
+  className={`flex items-center gap-1 justify-end text-xs mt-2 ${
+    msg.sender === currentUser
+      ? "text-indigo-100"
+      : "text-gray-400"
+  }`}
+>
+  <span>
     {msg.createdAt
       ? new Date(msg.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
@@ -577,25 +659,26 @@ return (
 
   {msg.sender === currentUser && (
     msg.seen ? (
-      <FaCheckDouble className="text-xs text-blue-300" />
+      <FaCheckDouble className="text-blue-300" />
     ) : (
-      <FaCheck className="text-xs text-indigo-100" />
+      <FaCheck />
     )
   )}
 </div>
+
+
 
               </div>
 
             </div>
 </div>
 
-);
-})}
+
           <div ref={bottomRef}></div>
 
         </div>
 
-        {/* ================= INPUT ================= */}
+        /* ================= INPUT ================= */}
 
         <div className="bg-white p-5 border-t">
 
