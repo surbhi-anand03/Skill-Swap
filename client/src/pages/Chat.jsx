@@ -640,7 +640,6 @@ return (
                 <p className="text-[15px] break-words">
                   {msg.text}
                 </p>
-<div className="flex items-center justify-end gap-1 mt-2">
  <div
   className={`flex items-center gap-1 justify-end text-xs mt-2 ${
     msg.sender === currentUser
@@ -666,19 +665,17 @@ return (
   )}
 </div>
 
-
-
               </div>
-
             </div>
-</div>
+          </div>
+        );
+      })}
 
+      <div ref={bottomRef}></div>
 
-          <div ref={bottomRef}></div>
+    </div>
 
-        </div>
-
-        /* ================= INPUT ================= */}
+        {/* ================= INPUT ================= */}
 
         <div className="bg-white p-5 border-t">
 
