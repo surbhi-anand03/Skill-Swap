@@ -32,13 +32,6 @@ export default function Chats() {
       "userId"
     );
 
-    const [
-      search,
-      setSearch,
-    ] = useState("");
-
-    
-
   // ================= LOAD =================
 
   const loadConversations =
@@ -50,8 +43,6 @@ export default function Chats() {
         setConversations(
           res.data
         );
-
-        console.log("CONVERSATIONS:", res.data);
       } catch (err) {
         console.log(err);
       }
@@ -82,17 +73,6 @@ export default function Chats() {
     };
   }, []);
 
-  // ================= SEARCH FILTER =================
-  const filteredChats =
-    conversations.filter(
-      (chat) =>
-        chat.user?.name
-          ?.toLowerCase()
-          .includes(
-            search.toLowerCase()
-          )
-    );
-
   return (
     <div className="fixed inset-0 flex bg-white overflow-hidden">
 
@@ -103,15 +83,6 @@ export default function Chats() {
         {/* TOP SPACING */}
 
         <div className="px-4 pt-5 pb-3 border-b flex-shrink-0">
-          <div className="px-4 py-3 border-b">
-            <input
-              type="text"
-              placeholder="Search chats..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-100 rounded-xl outline-none"
-            />
-          </div>
           <h2 className="text-2xl font-bold text-gray-800">
             Chats
           </h2>
@@ -125,7 +96,7 @@ export default function Chats() {
 
         <div className="flex-1 overflow-y-auto px-3 py-3">
 
-          {filteredChats.length ===
+          {conversations.length ===
           0 ? (
             <div className="flex items-center justify-center h-full text-center px-6">
               <div>
@@ -141,9 +112,8 @@ export default function Chats() {
               </div>
             </div>
           ) : (
-            filteredChats.map(
+            conversations.map(
               (chat) => {
-                console.log("CHAT:", chat);
                 const userId =
                   chat.user?._id;
 
@@ -206,7 +176,7 @@ export default function Chats() {
                             }
                           </h3>
 
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-400 flex-shrink-0">
                             {chat.updatedAt
                               ? new Date(
                                   chat.updatedAt
