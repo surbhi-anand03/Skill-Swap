@@ -9,7 +9,7 @@ const { Server } = require("socket.io");
 require("./cron/sessionCron");
 
 const connectDB = require("./config/db");
-
+const Message = require("./models/Message");
 const initializeSessionSocket = require("./sockets/sessionSocket");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");const requestRoutes = require("./routes/request");
@@ -58,6 +58,10 @@ const io = new Server(server, {
 // ================= ONLINE USERS =================
 let onlineUsers = [];
 
+let lastSeen = {};
+
+let unreadMessages = {};
+
 // ADD USER
 const addUser = (userId, socketId) => {
   const exists = onlineUsers.find(
@@ -74,8 +78,22 @@ const addUser = (userId, socketId) => {
 
 // REMOVE USER
 const removeUser = (socketId) => {
+  const user = onlineUsers.find(
+    (u) => u.socketId === socketId
+  );
+
+  if (user) {
+    lastSeen[user.userId] = new Date();
+
+    console.log(
+      "LAST SEEN SAVED:",
+      user.userId,
+      lastSeen[user.userId]
+    );
+  }
+
   onlineUsers = onlineUsers.filter(
-    (user) => user.socketId !== socketId
+    (u) => u.socketId !== socketId
   );
 };
 
@@ -86,63 +104,138 @@ const getUser = (userId) => {
   );
 };
 
+
 // ================= SOCKET CONNECTION =================
 io.on("connection", (socket) => {
-  console.log(
-    "User connected:",
-    socket.id
+
+socket.on("join", (userId) => {
+  addUser(userId, socket.id);
+
+  console.log("USER JOINED:", userId);
+
+  io.emit("getOnlineUsers", onlineUsers);
+
+  socket.emit(
+    "lastSeenUpdate",
+    lastSeen
   );
-
-  // ================= JOIN =================
-  socket.on("join", (userId) => {
-    addUser(userId, socket.id);
-
-    console.log(
-      "Online Users:",
-      onlineUsers
+});
+  socket.on("sendMessage", (data) => {
+    const user = getUser(
+      data.receiver
     );
 
-    // SEND ONLINE USERS TO EVERYONE
-    io.emit(
-      "getOnlineUsers",
-      onlineUsers
-    );
+    if (user) {
+      io.to(user.socketId).emit(
+        "receiveMessage",
+        data
+      );
+    }
+
+  const receiverId = data.receiver;
+const senderId = data.sender;
+
+if (!unreadMessages[receiverId]) {
+  unreadMessages[receiverId] = {};
+}
+
+if (!unreadMessages[receiverId][senderId]) {
+  unreadMessages[receiverId][senderId] = 0;
+}
+
+unreadMessages[receiverId][senderId] += 1;
+
+io.emit("unreadUpdate", unreadMessages);
+  
+
   });
 
-  // ================= SEND MESSAGE =================
+  socket.on("typing", ({ sender, receiver }) => {
+    const receiverUser =
+      getUser(receiver);
+
+    if (receiverUser) {
+      io.to(receiverUser.socketId)
+        .emit("typing");
+    }
+  });
+
+  socket.on("stopTyping", ({ sender, receiver }) => {
+    const receiverUser =
+      getUser(receiver);
+
+    if (receiverUser) {
+      io.to(receiverUser.socketId)
+        .emit("stopTyping");
+    }
+  });
+
+socket.on("markAsRead", ({ userId, chatUserId }) => {
+  if (unreadMessages[userId]?.[chatUserId] !== undefined) {
+    unreadMessages[userId][chatUserId] = 0;
+  }
+
+  io.emit("unreadUpdate", unreadMessages);
+
+ 
+});
+
   socket.on(
-    "sendMessage",
-    (data) => {
-      const user = getUser(
-        data.receiver
+    "messageSeen",
+    async ({ messageId, sender }) => {
+
+      await Message.findByIdAndUpdate(
+        messageId,
+        { seen: true }
       );
 
-      if (user) {
-        io.to(user.socketId).emit(
-          "receiveMessage",
-          data
-        );
+      const senderUser =
+        getUser(sender);
+
+      if (senderUser) {
+        io.to(senderUser.socketId)
+          .emit(
+            "messageSeen",
+            { messageId }
+          );
       }
     }
   );
+socket.on("disconnect", () => {
+  const user = onlineUsers.find(
+    (u) => u.socketId === socket.id
+  );
 
-  // ================= DISCONNECT =================
-  socket.on("disconnect", () => {
+  if (user) {
+    lastSeen[user.userId] =
+      new Date().toISOString();
+
     console.log(
-      "User disconnected:",
-      socket.id
+      "LAST SEEN SAVED:",
+      user.userId,
+      lastSeen[user.userId]
     );
+  }
 
-    removeUser(socket.id);
+  removeUser(socket.id);
 
-    // UPDATE ONLINE USERS
-    io.emit(
-      "getOnlineUsers",
-      onlineUsers
-    );
-  });
+  io.emit(
+    "getOnlineUsers",
+    onlineUsers
+  );
+
+  io.emit(
+    "lastSeenUpdate",
+    lastSeen
+  );
+
+  console.log(
+    "LAST SEEN OBJECT:",
+    lastSeen
+  );
 });
 
+}); // <-- closes io.on("connection")
 // ================= SESSION SOCKET =================
 initializeSessionSocket(io);
 
