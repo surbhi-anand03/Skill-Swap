@@ -1,3 +1,4 @@
+
 import {
   useEffect,
   useState,
@@ -27,17 +28,20 @@ export default function Chats() {
     setOnlineUsers,
   ] = useState([]);
 
+  const [
+    unread,
+    setUnread,
+  ] = useState({});
+
   const currentUser =
     localStorage.getItem(
       "userId"
     );
 
-    const [
-      search,
-      setSearch,
-    ] = useState("");
-
-    
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
   // ================= LOAD =================
 
@@ -51,7 +55,10 @@ export default function Chats() {
           res.data
         );
 
-        console.log("CONVERSATIONS:", res.data);
+        console.log(
+          "CONVERSATIONS:",
+          res.data
+        );
       } catch (err) {
         console.log(err);
       }
@@ -75,14 +82,28 @@ export default function Chats() {
       }
     );
 
+    // unread update
+    socket.on(
+      "unreadUpdate",
+      (data) => {
+        setUnread(data);
+        loadConversations();
+      }
+    );
+
     return () => {
       socket.off(
         "getOnlineUsers"
+      );
+
+      socket.off(
+        "unreadUpdate"
       );
     };
   }, []);
 
   // ================= SEARCH FILTER =================
+
   const filteredChats =
     conversations.filter(
       (chat) =>
@@ -94,24 +115,56 @@ export default function Chats() {
     );
 
   return (
-    <div className="fixed inset-0 flex bg-white overflow-hidden">
+    // <div className="fixed inset-0 flex bg-white overflow-hidden">
+    // <div className="w-full h-[100vh] flex bg-white overflow-hidden">
+      <div
+        className="
+          w-full
+          h-[calc(100vh-64px)]
+          md:h-[100vh]
+          flex
+          bg-white
+          overflow-hidden
+        "
+      >  
+    {/* ================= CHAT LIST ================= */}
 
-      {/* ================= CHAT LIST ================= */}
-
-      <div className="w-full lg:w-[360px] h-full bg-white border-r flex flex-col overflow-hidden">
-
-        {/* TOP SPACING */}
-
+      {/* <div className="w-full lg:w-[360px] h-full bg-white border-r flex flex-col overflow-hidden"> */}
+      {/* <div className="w-full md:w-[360px] lg:w-[380px] h-full bg-white border-r flex flex-col shrink-0"> */}
+        <div
+          className="
+            w-full
+            lg:w-[340px]
+            xl:w-[360px]
+            lg:min-w-[340px]
+            xl:min-w-[360px]
+            h-full
+            min-h-0
+            bg-white
+            border-r
+            flex
+            flex-col
+            flex-shrink-0
+            overflow-hidden
+          "
+        >
+        {/* TOP */}
         <div className="px-4 pt-5 pb-3 border-b flex-shrink-0">
+
           <div className="px-4 py-3 border-b">
             <input
               type="text"
               placeholder="Search chats..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(
+                  e.target.value
+                )
+              }
               className="w-full px-4 py-2 bg-gray-100 rounded-xl outline-none"
             />
           </div>
+
           <h2 className="text-2xl font-bold text-gray-800">
             Chats
           </h2>
@@ -120,14 +173,13 @@ export default function Chats() {
             Connect with learners
           </p>
         </div>
+                {/* ================= CONVERSATIONS ================= */}
 
-        {/* ================= CONVERSATIONS ================= */}
-
-        <div className="flex-1 overflow-y-auto px-3 py-3">
-
+<div className="flex-1 min-h-0 overflow-y-auto px-3 py-3">
           {filteredChats.length ===
           0 ? (
             <div className="flex items-center justify-center h-full text-center px-6">
+
               <div>
                 <h3 className="text-lg font-semibold text-gray-700">
                   No conversations
@@ -139,11 +191,12 @@ export default function Chats() {
                   conversations here.
                 </p>
               </div>
+
             </div>
           ) : (
             filteredChats.map(
               (chat) => {
-                console.log("CHAT:", chat);
+
                 const userId =
                   chat.user?._id;
 
@@ -157,6 +210,13 @@ export default function Chats() {
                         userId
                       )
                   );
+
+                const unreadCount =
+                  unread[
+                    currentUser
+                  ]?.[
+                    userId
+                  ] || 0;
 
                 return (
                   <Link
@@ -197,31 +257,38 @@ export default function Chats() {
 
                       <div className="flex-1 min-w-0">
 
-                        <div className="flex justify-between items-center gap-3">
+                        <div className="flex justify-between items-start gap-2">
 
-                          <h3 className="font-semibold text-gray-800 truncate text-[15px]">
-                            {
-                              chat.user
-                                ?.name
-                            }
-                          </h3>
+  <h3 className="font-semibold text-gray-800 truncate text-[15px] flex-1 min-w-0">
+    {chat.user?.name}
+  </h3>
 
-                          <span className="text-xs text-gray-400">
-                            {chat.updatedAt
-                              ? new Date(
-                                  chat.updatedAt
-                                ).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour:
-                                      "2-digit",
-                                    minute:
-                                      "2-digit",
-                                  }
-                                )
-                              : ""}
-                          </span>
-                        </div>
+  <div className="flex flex-col items-end shrink-0">
+
+    <span className="text-[11px] text-gray-400 whitespace-nowrap">
+      {chat.updatedAt
+        ? new Date(
+            chat.updatedAt
+          ).toLocaleTimeString(
+            [],
+            {
+              hour:
+                "2-digit",
+              minute:
+                "2-digit",
+            }
+          )
+        : ""}
+    </span>
+
+    {unreadCount > 0 && (
+      <span className="mt-1 bg-red-500 text-white text-[10px] h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center">
+        {unreadCount}
+      </span>
+    )}
+  </div>
+
+</div>
 
                         <p className="text-sm text-gray-500 truncate mt-1">
                           {chat.lastMessage ||
@@ -235,13 +302,12 @@ export default function Chats() {
             )
           )}
         </div>
+
       </div>
+            {/* ================= RIGHT SIDE ================= */}
 
-      {/* ================= RIGHT SIDE ================= */}
-
-      <div className="hidden lg:flex flex-1 items-center justify-center bg-[#f8fafc]">
-
-        <div className="text-center px-6">
+      {/* <div className="hidden lg:flex flex-1 items-center justify-center bg-[#f8fafc]"> */}
+<div className="hidden lg:flex flex-1 min-w-0 items-center justify-center bg-[#f8fafc] h-full">        <div className="text-center px-6">
 
           <div className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <div className="w-12 h-12 bg-indigo-600 rounded-full"></div>
@@ -256,8 +322,11 @@ export default function Chats() {
             to start chatting and
             connect with learners.
           </p>
+
         </div>
+
       </div>
+
     </div>
   );
 }

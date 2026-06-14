@@ -1,28 +1,3 @@
-// import Navbar from "./Navbar";
-
-// export default function Layout({
-//   children,
-// }) {
-//   return (
-//     <div className="min-h-screen bg-gray-50">
-//       <Navbar />
-
-//       <main
-//         className="
-//           w-full
-//           lg:ml-64
-//           pt-20
-//           lg:pt-0
-//           pb-20
-//           lg:pb-0
-//           min-h-screen
-//         "
-//       >
-//         {children}
-//       </main>
-//     </div>
-//   );
-// }
 
 import Navbar from "./Navbar";
 
