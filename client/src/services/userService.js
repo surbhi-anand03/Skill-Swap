@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api";
+const API = "https://skillswap-backend-zobn.onrender.com/api",
 
 export const getDiscoverUsers = async () => {
   const token = localStorage.getItem("token");

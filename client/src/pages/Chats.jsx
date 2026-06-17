@@ -7,7 +7,7 @@ import {
   FaComments,
 } from "react-icons/fa";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://skillswap-backend-zobn.onrender.com",);
 
 export default function Chats() {
   const [conversations, setConversations] =
