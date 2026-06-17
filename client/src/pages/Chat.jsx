@@ -114,27 +114,46 @@ export default function Chat() {
       "join",
       currentUser
     );
-  }, []);
+  }, [currentUser]);
 
   // ================= FETCH CHAT =================
 
-  useEffect(() => {
-    if (
-      selectedChatId
-    ) {
-      fetchMessages();
+  // useEffect(() => {
+  //   if (
+  //     selectedChatId
+  //   ) {
+  //     fetchMessages();
 
-      socket.emit(
-        "markAsRead",
-        {
-          userId:
-            currentUser,
-          chatUserId:
-            selectedChatId,
-        }
-      );
-    }
-  }, [selectedChatId]);
+  //     socket.emit(
+  //       "markAsRead",
+  //       {
+  //         userId:
+  //           currentUser,
+  //         chatUserId:
+  //           selectedChatId,
+  //       }
+  //     );
+  //   }
+  // }, [selectedChatId]);
+
+  useEffect(() => {
+  if (selectedChatId) {
+    fetchMessages();
+
+    socket.emit(
+      "markAsRead",
+      {
+        userId:
+          currentUser,
+        chatUserId:
+          selectedChatId,
+      }
+    );
+  }
+}, [
+  selectedChatId,
+  currentUser,
+]);
 
   // ================= AUTO SCROLL =================
 
@@ -149,27 +168,52 @@ export default function Chat() {
 
   // ================= MESSAGE SEEN =================
 
+  // useEffect(() => {
+  //   messages.forEach(
+  //     (msg) => {
+  //       if (
+  //         msg.sender ===
+  //           selectedChatId &&
+  //         !msg.seen
+  //       ) {
+  //         socket.emit(
+  //           "messageSeen",
+  //           {
+  //             messageId:
+  //               msg._id,
+  //             sender:
+  //               msg.sender,
+  //           }
+  //         );
+  //       }
+  //     }
+  //   );
+  // }, [messages]);
+
   useEffect(() => {
-    messages.forEach(
-      (msg) => {
-        if (
-          msg.sender ===
-            selectedChatId &&
-          !msg.seen
-        ) {
-          socket.emit(
-            "messageSeen",
-            {
-              messageId:
-                msg._id,
-              sender:
-                msg.sender,
-            }
-          );
-        }
+  messages.forEach(
+    (msg) => {
+      if (
+        msg.sender ===
+          selectedChatId &&
+        !msg.seen
+      ) {
+        socket.emit(
+          "messageSeen",
+          {
+            messageId:
+              msg._id,
+            sender:
+              msg.sender,
+          }
+        );
       }
-    );
-  }, [messages]);
+    }
+  );
+}, [
+  messages,
+  selectedChatId,
+]);
 
   // ================= SOCKET LISTENERS =================
 
@@ -462,10 +506,15 @@ export default function Chat() {
     };
 
   return (
-    <div
+<div
   className="
     w-full
-    h-screen
+    h-[calc(100vh-64px)]
+    mt-16
+    lg:mt-0
+    lg:h-screen
+    lg:ml-[280px]
+    lg:w-[calc(100%-280px)]
     flex
     bg-white
     overflow-hidden
@@ -477,12 +526,14 @@ export default function Chat() {
         className={`
           ${
             selectedChatId
-              ? "hidden lg:flex"
+              ? "hidden md:flex"
               : "flex"
           }
           w-full
+          md:w-[320px]
           lg:w-[340px]
           xl:w-[360px]
+          md:min-w-[320px]
           lg:min-w-[340px]
           xl:min-w-[360px]
           h-full
@@ -670,7 +721,7 @@ export default function Chat() {
           </div>
         </div>
       ) : (
-       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-[0]">
           {/* ================= HEADER ================= */}
 
           <div
@@ -695,7 +746,7 @@ export default function Chat() {
                   navigate("/chats")
                 }
                 className="
-                  lg:hidden
+                  md:hidden
                   w-10 h-10
                   rounded-xl
                   bg-slate-100
