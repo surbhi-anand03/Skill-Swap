@@ -6,7 +6,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import CompleteProfile from "./pages/CompleteProfile";
 
 import PrivateRoute from "./components/PrivateRoute";
-// import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar";
 import Layout from "./components/Layout";
 
 import Home from "./pages/Home";
@@ -131,7 +131,7 @@ function App() {
           }
         />
 
-        <Route
+        {/* <Route
   path="/chats"
   element={
     <PrivateRoute>
@@ -149,6 +149,30 @@ function App() {
       <Layout>
         <Chat />
       </Layout>
+    </PrivateRoute>
+  }
+/> */}
+
+<Route
+  path="/chats"
+  element={
+    <PrivateRoute>
+      <>
+        <Navbar />
+        <Chats />
+      </>
+    </PrivateRoute>
+  }
+/>
+
+<Route
+  path="/chat/:id"
+  element={
+    <PrivateRoute>
+      <>
+        <Navbar />
+        <Chat />
+      </>
     </PrivateRoute>
   }
 />

@@ -1,49 +1,31 @@
-
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
 import { io } from "socket.io-client";
-
+import { getConversations } from "../api/api";
 import {
-  getConversations,
-} from "../api/api";
+  FaSearch,
+  FaComments,
+} from "react-icons/fa";
 
-// SOCKET
-const socket = io(
-  "http://localhost:5000"
-);
+const socket = io("http://localhost:5000");
 
 export default function Chats() {
-  const [
-    conversations,
-    setConversations,
-  ] = useState([]);
+  const [conversations, setConversations] =
+    useState([]);
 
-  const [
-    onlineUsers,
-    setOnlineUsers,
-  ] = useState([]);
+  const [onlineUsers, setOnlineUsers] =
+    useState([]);
 
-  const [
-    unread,
-    setUnread,
-  ] = useState({});
+  const [unread, setUnread] =
+    useState({});
+
+  const [search, setSearch] =
+    useState("");
 
   const currentUser =
-    localStorage.getItem(
-      "userId"
-    );
+    localStorage.getItem("userId");
 
-  const [
-    search,
-    setSearch,
-  ] = useState("");
-
-  // ================= LOAD =================
+  // ================= LOAD CONVERSATIONS =================
 
   const loadConversations =
     async () => {
@@ -52,22 +34,18 @@ export default function Chats() {
           await getConversations();
 
         setConversations(
-          res.data
-        );
-
-        console.log(
-          "CONVERSATIONS:",
-          res.data
+          res.data || []
         );
       } catch (err) {
         console.log(err);
       }
     };
 
+  // ================= SOCKET =================
+
   useEffect(() => {
     loadConversations();
 
-    // join socket
     socket.emit(
       "join",
       currentUser
@@ -76,13 +54,10 @@ export default function Chats() {
     socket.on(
       "getOnlineUsers",
       (users) => {
-        setOnlineUsers(
-          users
-        );
+        setOnlineUsers(users);
       }
     );
 
-    // unread update
     socket.on(
       "unreadUpdate",
       (data) => {
@@ -105,53 +80,58 @@ export default function Chats() {
   // ================= SEARCH FILTER =================
 
   const filteredChats =
-    conversations.filter(
-      (chat) =>
-        chat.user?.name
-          ?.toLowerCase()
-          .includes(
-            search.toLowerCase()
-          )
+    conversations.filter((chat) =>
+      chat.user?.name
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
     );
 
   return (
-    // <div className="fixed inset-0 flex bg-white overflow-hidden">
-    // <div className="w-full h-[100vh] flex bg-white overflow-hidden">
+    <div
+  className="
+    flex
+    h-[calc(100vh-64px)]
+    mt-16
+    lg:mt-0
+    lg:ml-[280px]
+    lg:w-[calc(100%-280px)]
+    bg-gray-50
+    overflow-hidden
+  "
+>
+      {/* LEFT SIDE */}
       <div
-        className="
-          w-full
-          h-[calc(100vh-64px)]
-          md:h-[100vh]
-          flex
-          bg-white
-          overflow-hidden
-        "
-      >  
-    {/* ================= CHAT LIST ================= */}
+  className="
+    w-full
+    md:w-[320px]
+    lg:w-[340px]
+    xl:w-[370px]
+    md:min-w-[320px]
+    lg:min-w-[340px]
+    xl:min-w-[370px]
+    bg-white
+    border-r
+    flex
+    flex-col
+    shrink-0
+  "
+>
+        {/* HEADER */}
+        <div className="px-5 pt-5 pb-4 border-b bg-white">
+          <h1 className="text-2xl font-bold text-violet-700">
+            Chats
+          </h1>
 
-      {/* <div className="w-full lg:w-[360px] h-full bg-white border-r flex flex-col overflow-hidden"> */}
-      {/* <div className="w-full md:w-[360px] lg:w-[380px] h-full bg-white border-r flex flex-col shrink-0"> */}
-        <div
-          className="
-            w-full
-            lg:w-[340px]
-            xl:w-[360px]
-            lg:min-w-[340px]
-            xl:min-w-[360px]
-            h-full
-            min-h-0
-            bg-white
-            border-r
-            flex
-            flex-col
-            flex-shrink-0
-            overflow-hidden
-          "
-        >
-        {/* TOP */}
-        <div className="px-4 pt-5 pb-3 border-b flex-shrink-0">
+          <p className="text-sm text-gray-500 mt-1">
+            Connect with learners
+          </p>
 
-          <div className="px-4 py-3 border-b">
+          {/* SEARCH */}
+          <div className="relative mt-4">
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+
             <input
               type="text"
               placeholder="Search chats..."
@@ -161,42 +141,45 @@ export default function Chats() {
                   e.target.value
                 )
               }
-              className="w-full px-4 py-2 bg-gray-100 rounded-xl outline-none"
+              className="
+                w-full
+                pl-11
+                pr-4
+                py-3
+                rounded-2xl
+                bg-gray-100
+                outline-none
+                border
+                border-transparent
+                focus:border-violet-500
+                transition
+              "
             />
           </div>
-
-          <h2 className="text-2xl font-bold text-gray-800">
-            Chats
-          </h2>
-
-          <p className="text-sm text-gray-500 mt-1">
-            Connect with learners
-          </p>
         </div>
-                {/* ================= CONVERSATIONS ================= */}
 
-<div className="flex-1 min-h-0 overflow-y-auto px-3 py-3">
+        {/* CONVERSATION LIST */}
+        <div className="flex-1 overflow-y-auto p-3">
           {filteredChats.length ===
           0 ? (
-            <div className="flex items-center justify-center h-full text-center px-6">
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-700">
-                  No conversations
-                </h3>
-
-                <p className="text-sm text-gray-500 mt-2">
-                  Start chatting with
-                  people to see your
-                  conversations here.
-                </p>
+            <div className="h-full flex flex-col items-center justify-center text-center px-6">
+              <div className="w-20 h-20 rounded-full bg-violet-100 flex items-center justify-center mb-4">
+                <FaComments className="text-3xl text-violet-600" />
               </div>
 
+              <h3 className="text-lg font-semibold text-gray-700">
+                No conversations
+              </h3>
+
+              <p className="text-sm text-gray-500 mt-2">
+                Start chatting with
+                people to see your
+                conversations here.
+              </p>
             </div>
           ) : (
             filteredChats.map(
               (chat) => {
-
                 const userId =
                   chat.user?._id;
 
@@ -223,17 +206,27 @@ export default function Chats() {
                     key={userId}
                     to={`/chat/${userId}`}
                   >
-                    <div className="flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition mb-2 hover:bg-indigo-50 active:scale-[0.98]">
-
-                      {/* PROFILE IMAGE */}
-
-                      <div className="relative flex-shrink-0">
-
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-3
+                        p-3
+                        rounded-2xl
+                        hover:bg-violet-50
+                        transition
+                        cursor-pointer
+                        active:scale-[0.98]
+                        mb-2
+                      "
+                    >
+                      {/* PROFILE */}
+                      <div className="relative shrink-0">
                         <img
                           src={
                             chat.user
                               ?.profileImage ||
-                            `https://ui-avatars.com/api/?name=${chat.user?.name}&background=6366f1&color=fff`
+                            `https://ui-avatars.com/api/?name=${chat.user?.name}&background=7c3aed&color=fff`
                           }
                           alt={
                             chat.user
@@ -243,9 +236,8 @@ export default function Chats() {
                         />
 
                         {/* ONLINE DOT */}
-
                         <span
-                          className={`absolute bottom-1 right-1 w-3 h-3 rounded-full border-2 border-white ${
+                          className={`absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-white ${
                             isUserOnline
                               ? "bg-green-500"
                               : "bg-gray-400"
@@ -254,41 +246,42 @@ export default function Chats() {
                       </div>
 
                       {/* USER INFO */}
-
                       <div className="flex-1 min-w-0">
-
                         <div className="flex justify-between items-start gap-2">
+                          <h3 className="font-semibold text-gray-800 truncate">
+                            {
+                              chat.user
+                                ?.name
+                            }
+                          </h3>
 
-  <h3 className="font-semibold text-gray-800 truncate text-[15px] flex-1 min-w-0">
-    {chat.user?.name}
-  </h3>
+                          <div className="flex flex-col items-end shrink-0">
+                            <span className="text-[11px] text-gray-400">
+                              {chat.updatedAt
+                                ? new Date(
+                                    chat.updatedAt
+                                  ).toLocaleTimeString(
+                                    [],
+                                    {
+                                      hour:
+                                        "2-digit",
+                                      minute:
+                                        "2-digit",
+                                    }
+                                  )
+                                : ""}
+                            </span>
 
-  <div className="flex flex-col items-end shrink-0">
-
-    <span className="text-[11px] text-gray-400 whitespace-nowrap">
-      {chat.updatedAt
-        ? new Date(
-            chat.updatedAt
-          ).toLocaleTimeString(
-            [],
-            {
-              hour:
-                "2-digit",
-              minute:
-                "2-digit",
-            }
-          )
-        : ""}
-    </span>
-
-    {unreadCount > 0 && (
-      <span className="mt-1 bg-red-500 text-white text-[10px] h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center">
-        {unreadCount}
-      </span>
-    )}
-  </div>
-
-</div>
+                            {unreadCount >
+                              0 && (
+                              <span className="mt-1 bg-red-500 text-white text-[11px] min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center">
+                                {
+                                  unreadCount
+                                }
+                              </span>
+                            )}
+                          </div>
+                        </div>
 
                         <p className="text-sm text-gray-500 truncate mt-1">
                           {chat.lastMessage ||
@@ -302,31 +295,26 @@ export default function Chats() {
             )
           )}
         </div>
-
       </div>
-            {/* ================= RIGHT SIDE ================= */}
 
-      {/* <div className="hidden lg:flex flex-1 items-center justify-center bg-[#f8fafc]"> */}
-<div className="hidden lg:flex flex-1 min-w-0 items-center justify-center bg-[#f8fafc] h-full">        <div className="text-center px-6">
-
-          <div className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <div className="w-12 h-12 bg-indigo-600 rounded-full"></div>
+      {/* RIGHT SIDE */}
+      <div className="hidden lg:flex flex-1 bg-[#f8fafc] items-center justify-center p-10">
+        <div className="text-center max-w-md">
+          <div className="w-24 h-24 rounded-full bg-violet-100 flex items-center justify-center mx-auto mb-6">
+            <FaComments className="text-4xl text-violet-600" />
           </div>
 
           <h2 className="text-3xl font-bold text-gray-800">
             SkillSwap Chat
           </h2>
 
-          <p className="text-gray-500 mt-3 text-lg max-w-md">
+          <p className="text-gray-500 mt-3 text-lg">
             Select a conversation
             to start chatting and
             connect with learners.
           </p>
-
         </div>
-
       </div>
-
     </div>
   );
 }
