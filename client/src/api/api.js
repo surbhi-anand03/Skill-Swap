@@ -1,8 +1,14 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://skillswap-backend-zobn.onrender.com/api",
 });
+
+console.log(import.meta.env);
+console.log(
+  "API URL:",
+  import.meta.env.VITE_API_URL
+);
 
 // ================= TOKEN INTERCEPTOR =================
 API.interceptors.request.use((req) => {
@@ -97,7 +103,7 @@ export const getNotifications = async () => {
     localStorage.getItem("token");
 
   const res = await axios.get(
-    "http://localhost:5000/api/notification",
+    "https://skillswap-backend-zobn.onrender.com/api/notification",
     {
       headers: {
         Authorization: `Bearer ${token}`

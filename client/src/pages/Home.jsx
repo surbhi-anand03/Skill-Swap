@@ -68,19 +68,19 @@ export default function Home() {
         sessionRes,
       ] = await Promise.all([
         axios.get(
-          "http://localhost:5000/api/user/profile",
+          "https://skillswap-backend-zobn.onrender.com/api/user/profile",
           { headers }
         ),
         axios.get(
-          "http://localhost:5000/api/user/matches",
+          "https://skillswap-backend-zobn.onrender.com/api/user/matches",
           { headers }
         ),
         axios.get(
-          "http://localhost:5000/api/request/pending",
+          "https://skillswap-backend-zobn.onrender.com/api/request/pending",
           { headers }
         ),
         axios.get(
-          "http://localhost:5000/api/session/my",
+          "https://skillswap-backend-zobn.onrender.com/api/session/my",
           { headers }
         ),
       ]);

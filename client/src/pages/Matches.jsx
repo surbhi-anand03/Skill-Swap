@@ -108,11 +108,19 @@ export default function Matches() {
         </div>
       ) : (
         <div className="max-w-7xl mx-auto flex flex-col gap-5 sm:gap-6 lg:gap-8">
-          {matches.map((user) => (
+          {/* {matches.map((user) => (
             <MatchCard
               key={user._id}
               user={user}
             />
+          ))} */}
+          {matches
+            ?.filter((user) => user && user._id)
+            .map((user) => (
+              <MatchCard
+                key={user._id}
+                user={user}
+              />
           ))}
         </div>
       )}
